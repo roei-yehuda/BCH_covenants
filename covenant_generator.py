@@ -11,15 +11,17 @@ The purpose of the code here is to implement a cashScript (https://cashscript.or
 The class cashScript_cov_gen outputs a .cash file with the generated covenant smart contract.
 """
 
-import os.path
-import glob
-import datetime
-import sys
-from datetime import datetime
-import re
-import numpy as np
-import pandas as pd
-import subprocess
+import os
+# import os.path
+# import os.system
+# import glob
+# import datetime
+# import sys
+# from datetime import datetime
+# import re
+# import numpy as np
+# import pandas as pd
+# import subprocess
 
 
 
@@ -58,7 +60,7 @@ class utils():
         with open(json_path, "r") as f:
             for line in f:
                 if line.split(':')[0].strip(' \t\",') == 'bytecode':
-                    return line.split(':')[1].strip(' \t\",')
+                    return line.split(':')[1].strip(' \t\",\n')
         return ''
 
 
@@ -131,6 +133,7 @@ class cov_gen():
         :return: string
         """
         full_script = \
+            self.intro_comment + "\n\n" \
             "pragma cashscript ^" + self.pragma + ";\n\n" \
             "contract " + self.contract_name + "(" + self._get_constructor_text() + "){\n" \
             "\n" + \
@@ -159,9 +162,11 @@ class cov_gen():
         cash_file_path = cash_file_path if cash_file_path is not None else 'to_be_deleted.cash'
         json_file_path = json_file_path if json_file_path is not None else 'to_be_deleted.json'
 
-        subprocess.run(["cashc ", cash_file_path, " -o ", json_file_path])
+        self.save_script(cash_file_path)
+        os.system("cashc " + cash_file_path + " -o " + json_file_path)
+        # subprocess.run(["cashc ", cash_file_path, " -o ", json_file_path])
 
-        byte_code = utils.get_byte_code_from_artifact(json_file_path)
+        byte_code = utils().get_byte_code_from_artifact(json_file_path)
 
         if delete_cash_file_later and os.path.exists(cash_file_path):
             os.remove(cash_file_path)
@@ -186,7 +191,8 @@ class cov_gen():
 
         fn_name = 'spend'
 
-        fn_text =   "function " + fn_name + "() {\n" \
+        fn_text =   "function " + fn_name + "(pubkey pk, sig s) {\n" \
+                    "require(checkSig(s, pk));\n" \
                     "// Create and enforce outputs\n" \
                     "int minerFee = 1000; // hardcoded fee\n" \
                     "bytes8 amount = bytes8(int(bytes(tx.value)) - minerFee);\n" \
@@ -211,6 +217,8 @@ class cov_gen():
 cg = cov_gen()
 cg.basic_covenant(number_of_receipients=2)
 print(cg.get_script())
+print()
+print(cg.compile_script())
 
 
 
