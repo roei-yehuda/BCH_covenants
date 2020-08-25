@@ -19,47 +19,157 @@ from datetime import datetime
 import re
 import numpy as np
 import pandas as pd
+import subprocess
+
+
+
+class utils():
+
+    def __init__(self):
+        pass
+
+    def indent(self, s, tab='\t', indices=None):
+        """
+        This method adds a tab in the beginning of every line.
+        if indices is not None, tabs will only be added to lines with relevant indices
+        :param s: string
+        :param tab: string
+        :param indices: list of integers, or range
+        :return: string
+        """
+        lines_to_indent = list(range(s.count('\n') + 1)) if indices is None else list(indices)
+        lines = s.split('\n')
+        for i in lines_to_indent:
+            lines[i] = tab + lines[i]
+        return '\n'.join(lines)
+
+    def indent_inside(self, s, tab='\t'):
+        """
+        indent all lines except the first and last lines
+        """
+        return self.indent(s, tab, indices=list(range(s.count('\n') + 1))[1:-1])
+
+    def get_byte_code_from_artifact(self, json_path):
+        """
+        read an artifact json file, an output of cashc compilation, and return the bytecode
+        :param json_path: string
+        :return: string - if no bytecode is found, this methods returns an empty string
+        """
+        with open(json_path, "r") as f:
+            for line in f:
+                if line.split(':')[0].strip(' \t\",') == 'bytecode':
+                    return line.split(':')[1].strip(' \t\",')
+        return ''
 
 
 class cov_gen():
 
-    def __init__(self, contract_name='cov', cashScript_pragma='0.4.0'):
+    def __init__(self, contract_name='cov', cashScript_pragma='0.4.0', intro_comment=''):
+        # todo doc
+
         self.contract_name = contract_name
         self.pragma = cashScript_pragma
-        self.constructor_text = ""
-        self.body_text = ""
+        self.intro_comment = intro_comment
 
-    def _write_to_constructor(self, text):
-        self.constructor_text += text + ", "
+        # self.constructor_args is a dictionary with arguments names as keys and tuples like
+        # (type, name, index, description) as values. Saved in a dictionary in order to avoid having two arguments with
+        # the same name, while keeping track of order of arrival (index in constructor)
+        self.constructor_args = {}
 
-        # cons = [("bytes20", "recepient_0"), ("bytes20", "recepient_1")]
+        # self.functions is a dictionary with function names as keys and tuples like (fn_text, fn_description) as values
+        # saved in a dictionary in order to avoid having two functions with the same name
+        self.functions = {}
 
-    def _write_to_body(self, fn_text):
-        # we strip the input fn_text, then add indentation to its inner scope
+    def _add_to_constructor(self, type, name, description=''):
+        """
+        Adding a single argument to the contract's constructor.
+        :param type: string
+        :param name: string
+        :param description: (optional) string - this is used for inner purposes, and will not be written to the output contract
+        """
+        # we record the order of arrival simply with len(self.constructor_args.keys())
+        self.constructor_args[name] = (type, name, len(self.constructor_args.keys()), description)
 
-        def add_indentation(text):
-            text = "\t" + text.strip()[:-1]
-            text = text.replace('\n', '\n\t\t')
-            text = text[:text.rfind('\n')+1] + "\t}"
-            return text
+    def _get_constructor_text(self):
+        """
+        calculate the final string for the constructor
+        :return: string
+        """
 
-        self.body_text += add_indentation(fn_text) + "\n"
+        sorted_args_tuples = list(self.constructor_args.values())
+        sorted_args_tuples.sort(key=lambda t: t[2])     # '2' since the index of the constructor_arg is the third argument in each tuple
 
+        text = ''
+        for arg_tup in sorted_args_tuples:
+            text += arg_tup[0] + ' ' + arg_tup[1] + ', '
+        return text[:-2]
 
-    def output_script(self, return_as_string=False, output_file_path=None):
+    def _add_to_functions(self, fn_name, fn_text, description=''):
+        """
+        Adding a single function to the contract's body.
+        :param fn_name: string
+        :param fn_text: string
+        :param description: (optional) string - this is used for inner purposes, and will not be written to the output contract
+        """
+        self.functions[fn_name] = (fn_text, description)
 
+    def _get_functions_text(self):
+        """
+        calculate the final string for the contract body
+        :return: string
+        """
+        text = ''
+        for fn_tup in self.functions.values():
+            # we strip the input fn_text, then add one indentation ('\t') to its entirety and then another indentation
+            # to its inner scope
+            text += utils().indent(utils().indent_inside(fn_tup[0].strip())) + '\n'
+        return text
+
+    def get_script(self):
+        """
+        Calculate the (current) final script
+        :return: string
+        """
         full_script = \
             "pragma cashscript ^" + self.pragma + ";\n\n" \
-            "contract " + self.contract_name + "(" + self.constructor_text[:-2] + "){\n" \
-            "\n" + self.body_text + "\n" \
+            "contract " + self.contract_name + "(" + self._get_constructor_text() + "){\n" \
+            "\n" + \
+            self._get_functions_text() + \
+            "\n" \
             "}"
+        return full_script
 
-        if output_file_path is not None:
-            with open(output_file_path, "w") as f:
-                print(full_script, file=f)
+    def save_script(self, cash_file_path='covenant.cash'):
+        """
+        Save to file the (current) final script
+        :param cash_file_path: string
+        """
+        with open(cash_file_path, "w") as f:
+                print(self.get_script(), file=f)
 
-        if return_as_string:
-            return full_script
+    def compile_script(self, cash_file_path=None, json_file_path=None):
+        """
+        Use cashScript compiler, cashc, to compile the (current) final script, and return the byte_code.
+        :param cash_file_path: (optional) string. if None, no compiled artifact is saved to file.
+        :return: string
+        """
+
+        delete_cash_file_later = cash_file_path is None
+        delete_json_file_later = json_file_path is None
+        cash_file_path = cash_file_path if cash_file_path is not None else 'to_be_deleted.cash'
+        json_file_path = json_file_path if json_file_path is not None else 'to_be_deleted.json'
+
+        subprocess.run(["cashc ", cash_file_path, " -o ", json_file_path])
+
+        byte_code = utils.get_byte_code_from_artifact(json_file_path)
+
+        if delete_cash_file_later and os.path.exists(cash_file_path):
+            os.remove(cash_file_path)
+
+        if delete_json_file_later and os.path.exists(json_file_path):
+            os.remove(json_file_path)
+
+        return byte_code
 
     def basic_covenant(self,
                        number_of_receipients=1):
@@ -69,12 +179,14 @@ class cov_gen():
 
         # todo - maybe we need to check input is valid
 
-
-        # for pkh in allowed_output_pkh:
         for i in range(number_of_receipients):
-            self._write_to_constructor("bytes20 recepient_{}".format(i))
+            self._add_to_constructor(type="bytes20",
+                                     name="recepient_{}".format(i),
+                                     description="allowed_recepient")
 
-        fn_text =   "function spend(pubkey pk, sig s) {\n" \
+        fn_name = 'spend'
+
+        fn_text =   "function " + fn_name + "() {\n" \
                     "// Create and enforce outputs\n" \
                     "int minerFee = 1000; // hardcoded fee\n" \
                     "bytes8 amount = bytes8(int(bytes(tx.value)) - minerFee);\n" \
@@ -91,14 +203,14 @@ class cov_gen():
 
         fn_text += "}"
 
-        self._write_to_body(fn_text)
+        self._add_to_functions(fn_name, fn_text, description='basic_covenant')
 
 
 # if __name__ == 'main':
 
 cg = cov_gen()
-cg.basic_covenant(number_of_receipients=3)
-print(cg.output_script(return_as_string=True))
+cg.basic_covenant(number_of_receipients=2)
+print(cg.get_script())
 
 
 
