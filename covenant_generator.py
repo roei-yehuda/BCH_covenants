@@ -67,10 +67,15 @@ class utils():
 
 
 
+
+
 class cov_fn():
 
-    def __init__(self, fn_name, desc_comment=None):
+    def __init__(self, fn_name, desc_comment=None, miner_fee=1000):
+
         self.fn_name = fn_name
+        self.miner_fee = miner_fee
+
         self.fn_args = {}
         self.constructor_args = {}
         self.fn_lines = []
@@ -121,10 +126,13 @@ class cov_fn():
 
     def restrict_operators(self, n=1):
 
+        if n < 1:
+            return
+
         for i in range(n):
             self._add_to_constructor(type="bytes20",
                                      name="operator_{}_pkh_{}".format(i, self.fn_name),
-                                     description="operator_{}".format(i))
+                                     description="operator".format(i))
 
         self._add_to_fn_args('pubkey', 'pk')
         self._add_to_fn_args('sig', 's')
@@ -133,11 +141,57 @@ class cov_fn():
         self.fn_lines.append("require(" + req_pkh_cond + ");")
         self.fn_lines.append("require(checkSig(s, pk));")
 
+    def restrict_P2PKH_recipients(self,
+                                  n=1,
+                                  require_recipient_sig=False,
+                                  max_amount_per_recipient=None,
+                                  include_all=False
+                                  ):
 
+        if n < 1:
+            return
 
+        for i in range(n):
+            self._add_to_constructor(type="bytes20",
+                                     name="recepient_{}_pkh_{}".format(i, self.fn_name),
+                                     description="recepient")
 
-    def restrict_P2PKH_recipients(self):
-        pass
+        self._add_to_fn_args('pubkey', 'pk')
+        self._add_to_fn_args('sig', 's')
+
+        if require_recipient_sig:
+            self.fn_lines.append("// the tx can only be signed by one of the recipients")
+            req_pkh_cond = ' || '.join(["hash160(pk) == recepient_{}_pkh_{}".format(i, self.fn_name) for i in range(n)])
+            self.fn_lines.append("require(" + req_pkh_cond + ");")
+        else:
+            self.fn_lines.append("// the tx can be signed by anyone (after all, money can only be sent to the correct address)")
+        self.fn_lines.append("require(checkSig(s, pk));")
+
+        self.fn_lines.append("// Create and enforce outputs")
+
+        self.fn_lines.append("int minerFee = " + str(self.miner_fee) + "; // hardcoded fee")
+        self.fn_lines.append("int amount0_int = int(bytes(tx.value)) - minerFee")
+
+        if include_all:
+            # we assume all recipients get an equal amount
+            amount_str = "int(amount0_int / {})".format(n)    # todo maybe we need to do -1 ?
+        else:
+            # amount = "int(bytes(tx.value)) - minerFee"
+            amount_str = "amount0_int"
+        self.fn_lines.append("bytes8 amount = bytes8(" + amount_str + ");")
+
+        if max_amount_per_recipient is not None:
+            self.fn_lines.append("require(" + amount_str + " <= " + str(max_amount_per_recipient) + " + minerFee)")
+
+        for i in range(n):
+            self.fn_lines.append("bytes34 out_{} = new OutputP2PKH(amount, recepient_{}_pkh_{});".format(i, i, self.fn_name))
+
+        if include_all:
+            hashOutputs_cond = 'tx.hashOutputs == hash256(' + ' + '.join(['out_{}'.format(i) for i in range(n)]) + ')'
+        else:
+            hashOutputs_cond = ' || '.join(["tx.hashOutputs == hash256(out_{})".format(i) for i in range(n)])
+        self.fn_lines.append("require(" + hashOutputs_cond + ");")
+
 
 
 
@@ -281,15 +335,18 @@ class cov_gen():
 
 
     def new_fn(self,
-               fn_name,
-               desc_comment=None,
+               fn_name, desc_comment=None,
                n_operators=None,
+               n_P2PKH_recipients=None, require_recipient_sig=False, max_amount_per_recipient=None, include_all=False,
                ):
 
-        fn = cov_fn(fn_name, desc_comment)
+        fn = cov_fn(fn_name, desc_comment, miner_fee=self.miner_fee)
 
         if n_operators is not None:
             fn.restrict_operators(n_operators)
+
+        if n_P2PKH_recipients is not None:
+            fn.restrict_P2PKH_recipients(n_P2PKH_recipients, require_recipient_sig, max_amount_per_recipient, include_all)
 
         # get the function's text, and the dictionary with Args 4 Constructor
         fn_text, fn_a4c_dict = fn.get_fn_info()
@@ -381,7 +438,7 @@ class cov_gen():
 
 
 cg = cov_gen()
-# cg.basic_covenant(n_recipients=2, include_any=True)
+cg.basic_covenant(n_recipients=2, include_any=True)
 cg.allow_cold(1)
 print(cg.get_script())
 
@@ -390,6 +447,7 @@ print('\n\n\n*****')
 cg = cov_gen()
 # cg.basic_covenant(n_recipients=2, include_any=True)
 cg.new_fn('cold', n_operators=1)
+cg.new_fn('spend', n_P2PKH_recipients=2)
 print(cg.get_script())
 
 # print(cg.compile_script(cash_file_path='shared_cold_cov.cash', json_file_path='shared_cold_cov.json'))
