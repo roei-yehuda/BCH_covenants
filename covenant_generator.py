@@ -66,6 +66,81 @@ class utils():
         return ''
 
 
+
+class cov_fn():
+
+    def __init__(self, fn_name, desc_comment=None):
+        self.fn_name = fn_name
+        self.fn_args = {}
+        self.constructor_args = {}
+        self.fn_lines = []
+
+        # start by adding the desc_comment right at the start:
+        if desc_comment is not None:
+            self.fn_lines.append('/*')
+            for l in desc_comment.split('\n'):
+                self.fn_lines.append(l)
+            self.fn_lines.append('*/')
+
+    def _add_to_fn_args(self, type, name, description=''):
+        """
+        Adding a single argument to the function's arguments.
+        :param type: string
+        :param name: string
+        :param description: (optional) string - this is used for inner purposes, and will not be written to the output contract
+        """
+        # we record the order of arrival with len(self.constructor_args.keys())
+        self.fn_args[name] = (type, name, len(self.fn_args.keys()), description)
+
+    def _get_fn_args_text(self):
+        return ', '.join([self.fn_args[k][0] + ' ' + self.fn_args[k][1] for k in self.fn_args.keys()])
+
+    def _add_to_constructor(self, type, name, description=''):
+        """
+        Adding a single argument to the contract's constructor.
+        :param type: string
+        :param name: string
+        :param description: (optional) string - this is used for inner purposes, and will not be written to the output contract
+        """
+        # we record the order of arrival with len(self.constructor_args.keys())
+        self.constructor_args[name] = (type, name, len(self.constructor_args.keys()), description)
+
+    def _get_fn_text(self):
+        """
+        unindented
+        :return:
+        """
+        fn_text = "function " + self.fn_name + "(" + self._get_fn_args_text() + ") {\n"
+        fn_text += '\n'.join(self.fn_lines)
+        fn_text += '\n}'
+        return fn_text
+
+    def get_fn_info(self):
+        return self._get_fn_text(), self.constructor_args
+
+
+    def restrict_operators(self, n=1):
+
+        for i in range(n):
+            self._add_to_constructor(type="bytes20",
+                                     name="operator_{}_pkh_{}".format(i, self.fn_name),
+                                     description="operator_{}".format(i))
+
+        self._add_to_fn_args('pubkey', 'pk')
+        self._add_to_fn_args('sig', 's')
+
+        req_pkh_cond = ' || '.join(["hash160(pk) == operator_{}_pkh_{}".format(i, self.fn_name) for i in range(n)])
+        self.fn_lines.append("require(" + req_pkh_cond + ");")
+        self.fn_lines.append("require(checkSig(s, pk));")
+
+
+
+
+    def restrict_P2PKH_recipients(self):
+        pass
+
+
+
 class cov_gen():
 
     def __init__(self, contract_name='cov', cashScript_pragma='0.4.0', miner_fee=1000, intro_comment=''):
@@ -110,8 +185,7 @@ class cov_gen():
         sorted_args_tuples = list(self.constructor_args.values())
         sorted_args_tuples.sort(
             key=lambda t: t[2])  # '2' since the index of the constructor_arg is the third argument in each tuple
-        return ', '.join(
-            [sorted_args_tuples[i][0] + ' ' + sorted_args_tuples[i][1] for i in range(len(sorted_args_tuples))])
+        return ', '.join([sorted_args_tuples[i][0] + ' ' + sorted_args_tuples[i][1] for i in range(len(sorted_args_tuples))])
 
     def _add_to_functions(self, fn_name, fn_text, description=''):
         """
@@ -206,6 +280,30 @@ class cov_gen():
 
 
 
+    def new_fn(self,
+               fn_name,
+               desc_comment=None,
+               n_operators=None,
+               ):
+
+        fn = cov_fn(fn_name, desc_comment)
+
+        if n_operators is not None:
+            fn.restrict_operators(n_operators)
+
+        # get the function's text, and the dictionary with Args 4 Constructor
+        fn_text, fn_a4c_dict = fn.get_fn_info()
+
+        for k in fn_a4c_dict.keys():
+            self._add_to_constructor(type= fn_a4c_dict[k][0],
+                                     name= fn_a4c_dict[k][1],
+                                     description= fn_a4c_dict[k][3])
+
+        self._add_to_functions(fn_name, fn_text)
+
+
+
+
     def basic_covenant(self,
                        n_recipients=1,
                        p2sh_recipients_indices=[],
@@ -282,11 +380,18 @@ class cov_gen():
         self._add_to_functions(fn_name, fn_text, description='cold')
 
 
-cg = cov_gen(intro_comment='R&A experiment with a shared cold account')
-cg.basic_covenant(n_recipients=2, include_any=True)
+cg = cov_gen()
+# cg.basic_covenant(n_recipients=2, include_any=True)
 cg.allow_cold(1)
 print(cg.get_script())
-print()
+
+print('\n\n\n*****')
+
+cg = cov_gen()
+# cg.basic_covenant(n_recipients=2, include_any=True)
+cg.new_fn('cold', n_operators=1)
+print(cg.get_script())
+
 # print(cg.compile_script(cash_file_path='shared_cold_cov.cash', json_file_path='shared_cold_cov.json'))
 
 
