@@ -287,12 +287,12 @@ class cov_gen():
 
 
 
-cg = cov_gen(intro_comment='gannan gidel dagan bagan')
-cg.basic_covenant(n_recipients=2, include_any=True)
+cg = cov_gen(intro_comment='R&A experiment with a shared cold account')
+# cg.basic_covenant(n_recipients=2, include_any=True)
 cg.allow_cold(2)
 print(cg.get_script())
 print()
-# print(cg.compile_script(cash_file_path='cov.cash', json_file_path='arti.json'))
+print(cg.compile_script(cash_file_path='shared_cold_cov.cash', json_file_path='shared_cold_cov.json'))
 
 
 
