@@ -13,6 +13,8 @@ The class cashScript_cov_gen outputs a .cash file with the generated covenant sm
 """
 
 import os
+
+
 # import os.path
 # import os.system
 # import glob
@@ -23,7 +25,6 @@ import os
 # import numpy as np
 # import pandas as pd
 # import subprocess
-
 
 
 class utils():
@@ -107,8 +108,10 @@ class cov_gen():
         :return: string
         """
         sorted_args_tuples = list(self.constructor_args.values())
-        sorted_args_tuples.sort(key=lambda t: t[2])     # '2' since the index of the constructor_arg is the third argument in each tuple
-        return ', '.join([sorted_args_tuples[i][0] + ' ' + sorted_args_tuples[i][1] for i in range(len(sorted_args_tuples))])
+        sorted_args_tuples.sort(
+            key=lambda t: t[2])  # '2' since the index of the constructor_arg is the third argument in each tuple
+        return ', '.join(
+            [sorted_args_tuples[i][0] + ' ' + sorted_args_tuples[i][1] for i in range(len(sorted_args_tuples))])
 
     def _add_to_functions(self, fn_name, fn_text, description=''):
         """
@@ -126,7 +129,8 @@ class cov_gen():
         """
         # we strip the input fn_text, then add one indentation ('\t') to its entirety and then another indentation
         # to its inner scope
-        return '\n\n'.join([utils().indent(utils().indent_inside(fn_tup[0].strip())) for fn_tup in self.functions.values()])
+        return '\n\n'.join(
+            [utils().indent(utils().indent_inside(fn_tup[0].strip())) for fn_tup in self.functions.values()])
 
     def _get_intro_comment_text(self):
         """
@@ -144,8 +148,8 @@ class cov_gen():
         full_script = \
             self._get_intro_comment_text() + \
             "pragma cashscript ^" + self.pragma + ";\n\n" \
-            "contract " + self.contract_name + "(" + self._get_constructor_text() + "){\n" \
-            "\n" + \
+                                                  "contract " + self.contract_name + "(" + self._get_constructor_text() + "){\n" \
+                                                                                                                          "\n" + \
             self._get_functions_text() + \
             "\n" \
             "}"
@@ -157,7 +161,7 @@ class cov_gen():
         :param cash_file_path: string
         """
         with open(cash_file_path, "w") as f:
-                print(self.get_script(), file=f)
+            print(self.get_script(), file=f)
 
     def compile_script(self, cash_file_path=None, json_file_path=None):
         """
@@ -227,7 +231,7 @@ class cov_gen():
         fn_text += "}"
 
         self._add_to_functions(fn_name, fn_text, description='basic_covenant')
-        
+
         """
 
         fn_lines = []
@@ -240,26 +244,27 @@ class cov_gen():
         fn_lines.append("require(checkSig(s, pk));")
         fn_lines.append("// Create and enforce outputs")
         fn_lines.append("int minerFee = " + str(self.miner_fee) + "; // hardcoded fee")
-        amount = "int(bytes(tx.value)) - minerFee" if include_any else "int((int(bytes(tx.value)) - minerFee) / {})".format(n_recipients)
+        amount = "int(bytes(tx.value)) - minerFee" if include_any else "int((int(bytes(tx.value)) - minerFee) / {})".format(
+            n_recipients)
         fn_lines.append("bytes8 amount = bytes8(" + amount + ");")
 
         for i in range(n_recipients):
             if i in p2pkh_recipients_indices:
-                fn_lines.append("bytes34 out_{} = new OutputP2PKH(amount, recepient_{}_pkh);".format(i,i))
-            else:   # this means i is in p2sh_recipients_indices
-                fn_lines.append("bytes32 out_{} = new OutputP2SH(amount, recepient_{}_pkh);".format(i,i))   # todo
+                fn_lines.append("bytes34 out_{} = new OutputP2PKH(amount, recepient_{}_pkh);".format(i, i))
+            else:  # this means i is in p2sh_recipients_indices
+                fn_lines.append("bytes32 out_{} = new OutputP2SH(amount, recepient_{}_pkh);".format(i, i))  # todo
 
         if include_any:
             hashOutputs_cond = ' || '.join(["tx.hashOutputs == hash256(out_{})".format(i) for i in range(n_recipients)])
         else:
-            hashOutputs_cond = 'tx.hashOutputs == hash256(' + ' + '.join(['out_{}'.format(i) for i in range(n_recipients)]) + ')'
+            hashOutputs_cond = 'tx.hashOutputs == hash256(' + ' + '.join(
+                ['out_{}'.format(i) for i in range(n_recipients)]) + ')'
         fn_lines.append("require(" + hashOutputs_cond + ");")
 
         fn_lines.append('}')
 
         fn_text = '\n'.join(fn_lines)
         self._add_to_functions(fn_name, fn_text, description='basic_covenant')
-
 
     def allow_cold(self, n=1):
         """
@@ -286,16 +291,12 @@ class cov_gen():
         self._add_to_functions(fn_name, fn_text, description='cold')
 
 
-
-cg = cov_gen(intro_comment='gannan gidel dagan bagan')
-cg.basic_covenant(n_recipients=2, include_any=True)
+cg = cov_gen(intro_comment='R&A experiment with a shared cold account')
+# cg.basic_covenant(n_recipients=2, include_any=True)
 cg.allow_cold(2)
 print(cg.get_script())
 print()
-# print(cg.compile_script(cash_file_path='cov.cash', json_file_path='arti.json'))
-
-
-
+# print(cg.compile_script(cash_file_path='shared_cold_cov.cash', json_file_path='shared_cold_cov.json'))
 
 """
 
@@ -325,7 +326,7 @@ contract Escrow(bytes20 arbiter, bytes20 buyer, bytes20 seller) {
 
 
 contract Basic('for i in aaa print bytes20 i, ') {
-    
+
     function spend(pubkey pk, sig s) {
         require(hash160(pk) == arbiter);
         require(checkSig(s, pk));
