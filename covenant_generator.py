@@ -1,4 +1,5 @@
 # todo - check for any "???" left...
+# todo - add a clear desclaimer that this is a 'school' project.. no taking responsibility here :)
 
 """
 This file is part of the ??? project which can be found at ???github...???
@@ -33,7 +34,7 @@ class utils():
     def indent(self, s, tab='\t', indices=None):
         """
         This method adds a tab in the beginning of every line.
-        if indices is not None, tabs will only be added to lines with relevant indices
+        if indices is not None, tabs will only be added to lines with the relevant indices
         :param s: string
         :param tab: string
         :param indices: list of integers, or range
@@ -127,13 +128,21 @@ class cov_gen():
         # to its inner scope
         return '\n\n'.join([utils().indent(utils().indent_inside(fn_tup[0].strip())) for fn_tup in self.functions.values()])
 
+    def _get_intro_comment_text(self):
+        """
+        calculate the final string for the intro comment
+        """
+        if self.intro_comment == '':
+            return ''
+        return '/*\n' + self.intro_comment + '\n*/\n\n'
+
     def get_script(self):
         """
         Calculate the (current) final script
         :return: string
         """
         full_script = \
-            self.intro_comment + "\n\n" \
+            self._get_intro_comment_text() + \
             "pragma cashscript ^" + self.pragma + ";\n\n" \
             "contract " + self.contract_name + "(" + self._get_constructor_text() + "){\n" \
             "\n" + \
@@ -153,7 +162,8 @@ class cov_gen():
     def compile_script(self, cash_file_path=None, json_file_path=None):
         """
         Use cashScript compiler, cashc, to compile the (current) final script, and return the byte_code.
-        :param cash_file_path: (optional) string. if None, no compiled artifact is saved to file.
+        :param cash_file_path: (optional) string. if None, no cashScript file (.cash) is saved to file.
+        :param json_file_path: (optional) string. if None, no compiled artifact (.json) is saved to file.
         :return: string
         """
 
@@ -186,6 +196,9 @@ class cov_gen():
         fn_name = 'spend'
 
         p2pkh_recipients_indices = [i for i in list(range(n_recipients)) if i not in p2sh_recipients_indices]
+
+        # todo - note that if this function has been called once, then we need to change the format of its constructor args: otherwise it'll just use ""recepient_{}_pkh"" again and it'll collide with the args created on the first run... they have to have a new unique name!
+        #
 
         for i in p2pkh_recipients_indices:
             self._add_to_constructor(type="bytes20",
@@ -274,14 +287,12 @@ class cov_gen():
 
 
 
-# if __name__ == 'main':
-
-cg = cov_gen()
+cg = cov_gen(intro_comment='gannan gidel dagan bagan')
 cg.basic_covenant(n_recipients=2, include_any=True)
 cg.allow_cold(2)
 print(cg.get_script())
 print()
-# print(cg.compile_script())
+# print(cg.compile_script(cash_file_path='cov.cash', json_file_path='arti.json'))
 
 
 
