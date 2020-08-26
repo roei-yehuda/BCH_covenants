@@ -127,10 +127,24 @@ class cov_gen():
         calculate the final string for the contract body
         :return: string
         """
-        # we strip the input fn_text, then add one indentation ('\t') to its entirety and then another indentation
-        # to its inner scope
-        return '\n\n'.join(
-            [utils().indent(utils().indent_inside(fn_tup[0].strip())) for fn_tup in self.functions.values()])
+        def indent_fn(fn_text):
+            # main indentation:
+            output = utils().indent_inside(fn_text.strip()) # we strip the input fn_text, then add indentation ('\t') to its inner scope
+            output = utils().indent(output)     # another indentation for the entire thing
+            # now check for "if" statements and add an additional tab. (We don't account for nested "if"s...)
+            lines = fn_text.split('\n')
+            lines_to_indent = []
+            for i in range(len(lines)):
+                l, l_is_an_if_line = lines[i].strip(), False
+                for if_prefix in []:
+                    if l.startswith(if_prefix):
+                        l_is_an_if_line = True
+                if l_is_an_if_line:
+                    lines_to_indent.append(i+1)
+            output = utils().indent(output, indices=lines_to_indent)
+            return output
+
+        return '\n\n'.join([indent_fn(fn_tup[0]) for fn_tup in self.functions.values()])
 
     def _get_intro_comment_text(self):
         """
@@ -148,10 +162,10 @@ class cov_gen():
         full_script = \
             self._get_intro_comment_text() + \
             "pragma cashscript ^" + self.pragma + ";\n\n" \
-                                                  "contract " + self.contract_name + "(" + self._get_constructor_text() + "){\n" \
-                                                                                                                          "\n" + \
+            "contract " + self.contract_name + "(" + self._get_constructor_text() + "){\n" \
+            "\n" + \
             self._get_functions_text() + \
-            "\n" \
+            "\n\n" \
             "}"
         return full_script
 
@@ -190,6 +204,8 @@ class cov_gen():
 
         return byte_code
 
+
+
     def basic_covenant(self,
                        n_recipients=1,
                        p2sh_recipients_indices=[],
@@ -208,31 +224,6 @@ class cov_gen():
             self._add_to_constructor(type="bytes20",
                                      name="recepient_{}_pkh".format(i),
                                      description="allowed_recepient")
-
-        """ OLDER VERSION (before transitioning to fn_lines we used a more explicit fn_text)
-
-        fn_text =   "function " + fn_name + "(pubkey pk, sig s) {\n" \
-                    "require(hash160(pk) == pkh);\n" \  # todo
-                    "require(checkSig(s, pk));\n" \
-                    "// Create and enforce outputs\n" \
-                    "int minerFee = " + str(self.miner_fee) + "; // hardcoded fee\n" \
-                    "bytes8 amount = bytes8(int(bytes(tx.value)) - minerFee);\n" \
-                    ""
-
-        for i in range(n_recipients):
-            fn_text += "bytes34 out_{} = new OutputP2PKH(amount, recepient_{}_pkh);\n".format(i,i)
-
-
-        fn_text += "require("
-        for i in range(n_recipients):
-            fn_text += "tx.hashOutputs == hash256(out_{}) || ".format(i)
-        fn_text = fn_text[:-4] + ");\n"
-
-        fn_text += "}"
-
-        self._add_to_functions(fn_name, fn_text, description='basic_covenant')
-
-        """
 
         fn_lines = []
         fn_lines.append("function " + fn_name + "(pubkey pk, sig s) {")
@@ -292,8 +283,8 @@ class cov_gen():
 
 
 cg = cov_gen(intro_comment='R&A experiment with a shared cold account')
-# cg.basic_covenant(n_recipients=2, include_any=True)
-cg.allow_cold(2)
+cg.basic_covenant(n_recipients=2, include_any=True)
+cg.allow_cold(1)
 print(cg.get_script())
 print()
 # print(cg.compile_script(cash_file_path='shared_cold_cov.cash', json_file_path='shared_cold_cov.json'))
