@@ -298,6 +298,13 @@ print(cg.get_script())
 print()
 # print(cg.compile_script(cash_file_path='shared_cold_cov.cash', json_file_path='shared_cold_cov.json'))
 
+
+
+
+
+
+
+
 """
 
 Output instantiation - enforcing transaction outputs 
