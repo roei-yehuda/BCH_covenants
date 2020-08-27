@@ -13,6 +13,7 @@ The class cashScript_cov_gen outputs a .cash file with the generated covenant sm
 """
 
 import os
+import copy
 
 
 # import os.path
@@ -68,7 +69,6 @@ class utils():
 
 
 
-
 class cov_fn():
 
     def __init__(self, fn_name, desc_comment=None, miner_fee=1000):
@@ -77,11 +77,12 @@ class cov_fn():
         self.miner_fee = miner_fee
 
         self.fn_args = {}
+        self.fn_vars = {}
         self.constructor_args = {}
         self.fn_lines = []
 
         # start by adding the desc_comment right at the start:
-        if desc_comment is not None:
+        if desc_comment is not None and desc_comment != '':
             self.fn_lines.append('/*')
             for l in desc_comment.split('\n'):
                 self.fn_lines.append(l)
@@ -96,6 +97,35 @@ class cov_fn():
         """
         # we record the order of arrival with len(self.constructor_args.keys())
         self.fn_args[name] = (type, name, len(self.fn_args.keys()), description)
+
+    def _add_to_fn_vars(self, type, name):
+        """
+        Adding a single argument to the function's arguments.
+        :param type: string
+        :param name: string
+        :param v: string
+        """
+        self.fn_vars[name] = (type, name)
+
+    def _append_line_if_new(self, line):
+        """
+        append to sel.fn_lines only if this line did not appear beforehand
+        :param line: string
+        """
+        do_append = True
+        for l in self.fn_lines:
+            if l==line:
+                do_append = False
+        if do_append:
+            self.fn_lines.append(line)
+
+    def _count_fn_vars(self, prefix=''):
+        """
+        Count how many variables are already stored in self.fn_vars
+        :param prefix: string - count only variables with this prefix
+        :return: int
+        """
+        return len([k for k in self.fn_vars.keys() if k.startswith(prefix)])
 
     def _get_fn_args_text(self):
         return ', '.join([self.fn_args[k][0] + ' ' + self.fn_args[k][1] for k in self.fn_args.keys()])
@@ -124,10 +154,13 @@ class cov_fn():
         return self._get_fn_text(), self.constructor_args
 
 
+    restrict_operators_kwargs_d = {'n':1}
     def restrict_operators(self, n=1):
 
         if n < 1:
             return
+
+        self.fn_lines.append("// *** restrict operators")
 
         for i in range(n):
             self._add_to_constructor(type="bytes20",
@@ -139,60 +172,184 @@ class cov_fn():
 
         req_pkh_cond = ' || '.join(["hash160(pk) == operator_{}_pkh_{}".format(i, self.fn_name) for i in range(n)])
         self.fn_lines.append("require(" + req_pkh_cond + ");")
-        self.fn_lines.append("require(checkSig(s, pk));")
+        self._append_line_if_new("require(checkSig(s, pk));")
 
-    def restrict_P2PKH_recipients(self,
-                                  n=1,
-                                  require_recipient_sig=False,
-                                  max_amount_per_recipient=None,
-                                  include_all=False
-                                  ):
-
-        if n < 1:
+    restrict_recipients_kwargs_d = {'n_PKH':1, 'n_SH':0, 'require_recipient_sig':False, 'include_all':False}
+    def restrict_recipients(self,
+                            n_PKH=1,
+                            n_SH=0,
+                            require_recipient_sig=False,
+                            include_all=False
+                            ):
+        n = n_PKH + n_SH
+        if n == 0:
             return
 
-        for i in range(n):
+        self.fn_lines.append("// *** restrict recipients")
+
+        for i in range(n_PKH):
             self._add_to_constructor(type="bytes20",
                                      name="recepient_{}_pkh_{}".format(i, self.fn_name),
-                                     description="recepient")
+                                     description="recepient_pkh")
+
+        for i in range(n_SH):
+            self._add_to_constructor(type="bytes20",
+                                     name="recepient_{}_sh_{}".format(i, self.fn_name),
+                                     description="recepient_sh")
 
         self._add_to_fn_args('pubkey', 'pk')
         self._add_to_fn_args('sig', 's')
 
         if require_recipient_sig:
-            self.fn_lines.append("// the tx can only be signed by one of the recipients")
-            req_pkh_cond = ' || '.join(["hash160(pk) == recepient_{}_pkh_{}".format(i, self.fn_name) for i in range(n)])
+            self.fn_lines.append("// the tx can only be signed by one of the pkh recipients")
+            req_pkh_cond = ' || '.join(["hash160(pk) == recepient_{}_pkh_{}".format(i, self.fn_name) for i in range(n_PKH)])
             self.fn_lines.append("require(" + req_pkh_cond + ");")
         else:
             self.fn_lines.append("// the tx can be signed by anyone (after all, money can only be sent to the correct address)")
-        self.fn_lines.append("require(checkSig(s, pk));")
+        self._append_line_if_new("require(checkSig(s, pk));")
 
         self.fn_lines.append("// Create and enforce outputs")
 
-        self.fn_lines.append("int minerFee = " + str(self.miner_fee) + "; // hardcoded fee")
-        self.fn_lines.append("int amount0_int = int(bytes(tx.value)) - minerFee")
+        if self._count_fn_vars('minerFee') == 0:
+            self.fn_lines.append("int minerFee = " + str(self.miner_fee) + "; // hardcoded fee")
+            self._add_to_fn_vars('int', 'minerFee')
+        if self._count_fn_vars('intTxVal') == 0:
+            self.fn_lines.append("int intTxVal = int(bytes(tx.value));")
+            self._add_to_fn_vars('int', 'intTxVal')
+
+        j = self._count_fn_vars('intAmount_')
+        if include_all and n > 1:
+            # we assume all recipients get an equal share
+            self.fn_lines.append("int intAmount_{} = int((intTxVal - minerFee) / {})".format(j, n)) # todo maybe we need to do -1 ?
+        else:
+            self.fn_lines.append("int intAmount_{} = intTxVal - minerFee".format(j))
+        self._add_to_fn_vars('int', 'intAmount_{}'.format(j))
+        self.fn_lines.append("bytes8 amount = bytes8(intAmount_{});".format(j))
+
+        for i in range(n_PKH):
+            self.fn_lines.append("bytes34 outPKH_{} = new OutputP2PKH(amount, recepient_{}_pkh_{});".format(i, i, self.fn_name))
+        for i in range(n_SH):
+            self.fn_lines.append("bytes32 outSH_{} = new OutputP2SH(amount, recepient_{}_sh_{});".format(i, i, self.fn_name))
+        # todo - when the user is typing SH recipients adresses, allow him to type THIS_CONTRACT, in which case we need to write "hash160(tx.bytecode)"
 
         if include_all:
-            # we assume all recipients get an equal amount
-            amount_str = "int(amount0_int / {})".format(n)    # todo maybe we need to do -1 ?
+            sep = ' + '
+            all_outs = ['outPKH_{}'.format(i) for i in range(n_PKH)] + ['outSH_{}'.format(i) for i in range(n_SH)]
+            hashOutputs_cond = 'tx.hashOutputs == hash256(' + sep.join(all_outs) + ')'
         else:
-            # amount = "int(bytes(tx.value)) - minerFee"
-            amount_str = "amount0_int"
-        self.fn_lines.append("bytes8 amount = bytes8(" + amount_str + ");")
-
-        if max_amount_per_recipient is not None:
-            self.fn_lines.append("require(" + amount_str + " <= " + str(max_amount_per_recipient) + " + minerFee)")
-
-        for i in range(n):
-            self.fn_lines.append("bytes34 out_{} = new OutputP2PKH(amount, recepient_{}_pkh_{});".format(i, i, self.fn_name))
-
-        if include_all:
-            hashOutputs_cond = 'tx.hashOutputs == hash256(' + ' + '.join(['out_{}'.format(i) for i in range(n)]) + ')'
-        else:
-            hashOutputs_cond = ' || '.join(["tx.hashOutputs == hash256(out_{})".format(i) for i in range(n)])
+            sep = ' || '
+            all_outs = ["tx.hashOutputs == hash256(outPKH_{})".format(i) for i in range(n_PKH)] + ["tx.hashOutputs == hash256(outSH_{})".format(i) for i in range(n_SH)]
+            hashOutputs_cond = sep.join(all_outs)
         self.fn_lines.append("require(" + hashOutputs_cond + ");")
 
+    restrict_amount_kwargs_d = {'max_amount_per_tx': None, 'max_amount_per_recipient': None}
+    def restrict_amount(self, max_amount_per_tx=None, max_amount_per_recipient=None):
 
+        if max_amount_per_tx is None and max_amount_per_recipient is None:
+            return
+
+        self.fn_lines.append("// *** restrict amount")
+
+        self._add_to_fn_args('pubkey', 'pk')
+        self._add_to_fn_args('sig', 's')
+        self._append_line_if_new("require(checkSig(s, pk));")
+
+        if self._count_fn_vars('minerFee') == 0:
+            self.fn_lines.append("int minerFee = " + str(self.miner_fee) + "; // hardcoded fee")
+            self._add_to_fn_vars('int', 'minerFee')
+        if self._count_fn_vars('intTxVal') == 0:
+            self.fn_lines.append("int intTxVal = int(bytes(tx.value));")
+            self._add_to_fn_vars('int', 'intTxVal')
+
+        if max_amount_per_tx is not None:
+            self.fn_lines.append("// restrict amount per tx")
+            self.fn_lines.append("require(intTxVal <= " + str(max_amount_per_tx) + " + minerFee);")
+
+        if max_amount_per_recipient is not None:
+            self.fn_lines.append("// restrict amount per recipient")
+            saved_intAmounts = [k for k in self.fn_vars.keys() if k.startswith('intAmount_')]
+            self.fn_lines.append("require(" + ' && '.join(["{} <= {}".format(k, str(max_amount_per_recipient)) for k in saved_intAmounts]) + ");")
+
+    restrict_time_kwargs_d = {'min':None, 'max':None, 'time_limit':None, 'age_limit':None}
+    def restrict_time(self, min=None, max=None, time_limit=None, age_limit=None):   # todo - understand what the difference is...
+
+        if (min is None and max is None) or (time_limit is None and age_limit is None):
+            return
+
+        self.fn_lines.append("// *** restrict time of tx")
+
+        self._add_to_fn_args('pubkey', 'pk')
+        self._add_to_fn_args('sig', 's')
+        self._append_line_if_new("require(checkSig(s, pk));")
+
+        txT = "tx.time" if time_limit is not None else "tx.age"
+        if min is not None:
+            self.fn_lines.append("require({} <= {});".format(str(min), txT))
+        if max is not None:
+            self.fn_lines.append("require({} <= {});".format(txT, str(max)))
+
+
+    # def restrict_P2PKH_recipients(self,
+    #                               n=1,
+    #                               require_recipient_sig=False,
+    #                               include_all=False
+    #                               ):
+    #
+    #     if n < 1:
+    #         return
+    #
+    #     self.fn_lines.append("// *** restrict P2PKH recipients")
+    #
+    #     for i in range(n):
+    #         self._add_to_constructor(type="bytes20",
+    #                                  name="recepient_{}_pkh_{}".format(i, self.fn_name),
+    #                                  description="recepient")
+    #
+    #     self._add_to_fn_args('pubkey', 'pk')
+    #     self._add_to_fn_args('sig', 's')
+    #
+    #     if require_recipient_sig:
+    #         self.fn_lines.append("// the tx can only be signed by one of the recipients")
+    #         req_pkh_cond = ' || '.join(["hash160(pk) == recepient_{}_pkh_{}".format(i, self.fn_name) for i in range(n)])
+    #         self.fn_lines.append("require(" + req_pkh_cond + ");")
+    #     else:
+    #         self.fn_lines.append("// the tx can be signed by anyone (after all, money can only be sent to the correct address)")
+    #     self._append_line_if_new("require(checkSig(s, pk));")
+    #
+    #     self.fn_lines.append("// Create and enforce outputs")
+    #
+    #     if self._count_fn_vars('minerFee') == 0:
+    #         self.fn_lines.append("int minerFee = " + str(self.miner_fee) + "; // hardcoded fee")
+    #         self._add_to_fn_vars('int', 'minerFee')
+    #     if self._count_fn_vars('intTxVal') == 0:
+    #         self.fn_lines.append("int intTxVal = int(bytes(tx.value));")
+    #         self._add_to_fn_vars('int', 'intTxVal')
+    #
+    #     j = self._count_fn_vars('intAmount_')
+    #     if include_all:
+    #         # we assume all recipients get an equal amount
+    #         self.fn_lines.append("int intAmount_{} = int((intTxVal - minerFee) / {})".format(j, n))
+    #         # amount_str = "int((intTxVal - minerFee) / {})".format(n)    # todo maybe we need to do -1 ?
+    #     else:
+    #         # amount = "int(bytes(tx.value)) - minerFee"
+    #         # amount_str = "intTxVal - minerFee"
+    #         self.fn_lines.append("int intAmount_{} = intTxVal - minerFee".format(j))
+    #     self._add_to_fn_vars('int', 'intAmount_{}'.format(j))
+    #     self.fn_lines.append("bytes8 amount = bytes8(intAmount_{});".format(j))
+    #
+    #     for i in range(n):
+    #         self.fn_lines.append("bytes34 out_{} = new OutputP2PKH(amount, recepient_{}_pkh_{});".format(i, i, self.fn_name))
+    #
+    #     if include_all:
+    #         hashOutputs_cond = 'tx.hashOutputs == hash256(' + ' + '.join(['out_{}'.format(i) for i in range(n)]) + ')'
+    #     else:
+    #         hashOutputs_cond = ' || '.join(["tx.hashOutputs == hash256(out_{})".format(i) for i in range(n)])
+    #     self.fn_lines.append("require(" + hashOutputs_cond + ");")
+
+# f1 = cov_fn('f1')
+# f_fn = cov_fn.restrict_time
+# f2 = cov_fn('f2')
+# f2.f_fn()
 
 
 class cov_gen():
@@ -334,19 +491,26 @@ class cov_gen():
 
 
 
-    def new_fn(self,
-               fn_name, desc_comment=None,
-               n_operators=None,
-               n_P2PKH_recipients=None, require_recipient_sig=False, max_amount_per_recipient=None, include_all=False,
-               ):
-
+    def new_fn(self, fn_name, desc_comment=None, restrictions=[]):
+        """
+        add a new function to current contract
+        :param fn_name: string
+        :param desc_comment: string
+        :param restrictions: list of tuples (r, kwargs_dict) where r is a string describing one of the restrict
+                              functions in cov_fn and kwargs_dict is a dictionary with the required kwargs
+        """
         fn = cov_fn(fn_name, desc_comment, miner_fee=self.miner_fee)
 
-        if n_operators is not None:
-            fn.restrict_operators(n_operators)
-
-        if n_P2PKH_recipients is not None:
-            fn.restrict_P2PKH_recipients(n_P2PKH_recipients, require_recipient_sig, max_amount_per_recipient, include_all)
+        for r_tup in restrictions:
+            restriction, kwargs_dict = r_tup
+            if restriction == 'operators':
+                fn.restrict_operators(**kwargs_dict)
+            if restriction == 'recipients':
+                fn.restrict_recipients(**kwargs_dict)
+            if restriction == 'amount':
+                fn.restrict_amount(**kwargs_dict)
+            if restriction == 'time':
+                fn.restrict_time(**kwargs_dict)
 
         # get the function's text, and the dictionary with Args 4 Constructor
         fn_text, fn_a4c_dict = fn.get_fn_info()
@@ -358,150 +522,125 @@ class cov_gen():
 
         self._add_to_functions(fn_name, fn_text)
 
-
-
-
-    def basic_covenant(self,
-                       n_recipients=1,
-                       p2sh_recipients_indices=[],
-                       include_any=True):
-
-        # todo - maybe we need to check that the input is valid
-
-        fn_name = 'spend'
-
-        p2pkh_recipients_indices = [i for i in list(range(n_recipients)) if i not in p2sh_recipients_indices]
-
-        # todo - note that if this function has been called once, then we need to change the format of its constructor args: otherwise it'll just use ""recepient_{}_pkh"" again and it'll collide with the args created on the first run... they have to have a new unique name!
-        #
-
-        for i in p2pkh_recipients_indices:
-            self._add_to_constructor(type="bytes20",
-                                     name="recepient_{}_pkh".format(i),
-                                     description="allowed_recepient")
-
-        fn_lines = []
-        fn_lines.append("function " + fn_name + "(pubkey pk, sig s) {")
-
-        # # this is commented out because it is not necessary to check *who* the signer is. But useful so don't delete yet :)
-        # req_pkh_cond = ' || '.join(["hash160(pk) == recepient_{}_pkh".format(i) for i in p2pkh_recipients_indices])
-        # fn_lines.append("require(" + req_pkh_cond + ");")
-
-        fn_lines.append("require(checkSig(s, pk));")
-        fn_lines.append("// Create and enforce outputs")
-        fn_lines.append("int minerFee = " + str(self.miner_fee) + "; // hardcoded fee")
-        amount = "int(bytes(tx.value)) - minerFee" if include_any else "int((int(bytes(tx.value)) - minerFee) / {})".format(
-            n_recipients)
-        fn_lines.append("bytes8 amount = bytes8(" + amount + ");")
-
-        for i in range(n_recipients):
-            if i in p2pkh_recipients_indices:
-                fn_lines.append("bytes34 out_{} = new OutputP2PKH(amount, recepient_{}_pkh);".format(i, i))
-            else:  # this means i is in p2sh_recipients_indices
-                fn_lines.append("bytes32 out_{} = new OutputP2SH(amount, recepient_{}_pkh);".format(i, i))  # todo
-
-        if include_any:
-            hashOutputs_cond = ' || '.join(["tx.hashOutputs == hash256(out_{})".format(i) for i in range(n_recipients)])
-        else:
-            hashOutputs_cond = 'tx.hashOutputs == hash256(' + ' + '.join(
-                ['out_{}'.format(i) for i in range(n_recipients)]) + ')'
-        fn_lines.append("require(" + hashOutputs_cond + ");")
-
-        fn_lines.append('}')
-
-        fn_text = '\n'.join(fn_lines)
-        self._add_to_functions(fn_name, fn_text, description='basic_covenant')
-
-    def allow_cold(self, n=1):
+    def build_from_fn_list(self, l):
         """
-        This method basically allows easy and unlimited access to the funds in the contract for n people defined
-        in the constructor.
-        :param n: int
+        build the contract's body from a list of functions info
+        :param l: list of tuples (fn_name, fn_desc, fn_restrictions) where:
+                    fn_name: string
+                    fn_desc: string
+                    fn_restrictions: list of restrictions as described in self.new_fn
+        :return:
         """
+        for fn_tup in l:
+            self.new_fn(fn_tup[0], fn_tup[1], fn_tup[2])
 
-        fn_name = 'cold'
 
-        for i in range(n):
-            self._add_to_constructor(type="bytes20",
-                                     name="cold_{}_pkh".format(i),
-                                     description="cold_{}".format(i))
+    # def basic_covenant(self,
+    #                    n_recipients=1,
+    #                    p2sh_recipients_indices=[],
+    #                    include_any=True):
+    #
+    #     # todo - maybe we need to check that the input is valid
+    #
+    #     fn_name = 'spend'
+    #
+    #     p2pkh_recipients_indices = [i for i in list(range(n_recipients)) if i not in p2sh_recipients_indices]
+    #
+    #     # todo - note that if this function has been called once, then we need to change the format of its constructor args: otherwise it'll just use ""recepient_{}_pkh"" again and it'll collide with the args created on the first run... they have to have a new unique name!
+    #     #
+    #
+    #     for i in p2pkh_recipients_indices:
+    #         self._add_to_constructor(type="bytes20",
+    #                                  name="recepient_{}_pkh".format(i),
+    #                                  description="allowed_recepient")
+    #
+    #     fn_lines = []
+    #     fn_lines.append("function " + fn_name + "(pubkey pk, sig s) {")
+    #
+    #     # # this is commented out because it is not necessary to check *who* the signer is. But useful so don't delete yet :)
+    #     # req_pkh_cond = ' || '.join(["hash160(pk) == recepient_{}_pkh".format(i) for i in p2pkh_recipients_indices])
+    #     # fn_lines.append("require(" + req_pkh_cond + ");")
+    #
+    #     fn_lines.append("require(checkSig(s, pk));")
+    #     fn_lines.append("// Create and enforce outputs")
+    #     fn_lines.append("int minerFee = " + str(self.miner_fee) + "; // hardcoded fee")
+    #     amount = "int(bytes(tx.value)) - minerFee" if include_any else "int((int(bytes(tx.value)) - minerFee) / {})".format(
+    #         n_recipients)
+    #     fn_lines.append("bytes8 amount = bytes8(" + amount + ");")
+    #
+    #     for i in range(n_recipients):
+    #         if i in p2pkh_recipients_indices:
+    #             fn_lines.append("bytes34 out_{} = new OutputP2PKH(amount, recepient_{}_pkh);".format(i, i))
+    #         else:  # this means i is in p2sh_recipients_indices
+    #             fn_lines.append("bytes32 out_{} = new OutputP2SH(amount, recepient_{}_pkh);".format(i, i))  # todo
+    #
+    #     if include_any:
+    #         hashOutputs_cond = ' || '.join(["tx.hashOutputs == hash256(out_{})".format(i) for i in range(n_recipients)])
+    #     else:
+    #         hashOutputs_cond = 'tx.hashOutputs == hash256(' + ' + '.join(
+    #             ['out_{}'.format(i) for i in range(n_recipients)]) + ')'
+    #     fn_lines.append("require(" + hashOutputs_cond + ");")
+    #
+    #     fn_lines.append('}')
+    #
+    #     fn_text = '\n'.join(fn_lines)
+    #     self._add_to_functions(fn_name, fn_text, description='basic_covenant')
+    #
+    # def allow_cold(self, n=1):
+    #     """
+    #     This method basically allows easy and unlimited access to the funds in the contract for n people defined
+    #     in the constructor.
+    #     :param n: int
+    #     """
+    #
+    #     fn_name = 'cold'
+    #
+    #     for i in range(n):
+    #         self._add_to_constructor(type="bytes20",
+    #                                  name="cold_{}_pkh".format(i),
+    #                                  description="cold_{}".format(i))
+    #
+    #     fn_lines = []
+    #     fn_lines.append("function " + fn_name + "(pubkey pk, sig s) {")
+    #     req_pkh_cond = ' || '.join(["hash160(pk) == cold_{}_pkh".format(i) for i in range(n)])
+    #     fn_lines.append("require(" + req_pkh_cond + ");")
+    #     fn_lines.append("require(checkSig(s, pk));")
+    #     fn_lines.append('}')
+    #
+    #     fn_text = '\n'.join(fn_lines)
+    #     self._add_to_functions(fn_name, fn_text, description='cold')
 
-        fn_lines = []
-        fn_lines.append("function " + fn_name + "(pubkey pk, sig s) {")
-        req_pkh_cond = ' || '.join(["hash160(pk) == cold_{}_pkh".format(i) for i in range(n)])
-        fn_lines.append("require(" + req_pkh_cond + ");")
-        fn_lines.append("require(checkSig(s, pk));")
-        fn_lines.append('}')
 
-        fn_text = '\n'.join(fn_lines)
-        self._add_to_functions(fn_name, fn_text, description='cold')
+
+
 
 
 cg = cov_gen()
-cg.basic_covenant(n_recipients=2, include_any=True)
-cg.allow_cold(1)
-print(cg.get_script())
+funcs_list = []
 
-print('\n\n\n*****')
+f1 = 'cold'
+f1_desc = 'this is a cold func'
+f1_restrictions = []
+r, r_d = 'operators', copy.deepcopy(cov_fn.restrict_operators_kwargs_d) # {'n':1}
+r_d['n'] = 1
+f1_restrictions.append((r, r_d))
+# r, r_d = 'time', copy.deepcopy(cov_fn.restrict_time_kwargs_d) # {'min':None, 'max':None, 'time_limit':None, 'age_limit':None}
+# r_d['min'] = '30 days'
+# r_d['age_limit'] = True
+# f1_restrictions.append((r, r_d))
+funcs_list.append((f1, f1_desc, f1_restrictions))
 
-cg = cov_gen()
-# cg.basic_covenant(n_recipients=2, include_any=True)
-cg.new_fn('cold', n_operators=1)
-cg.new_fn('spend', n_P2PKH_recipients=2)
+f2 = 'spend'
+f2_desc = ''
+f2_restrictions = []
+r, r_d = 'recipients', copy.deepcopy(cov_fn.restrict_recipients_kwargs_d) # {'n_PKH':1, 'n_SH':0, 'require_recipient_sig':False, 'include_all':False}
+r_d['n_PKH']=2
+f2_restrictions.append((r, r_d))
+funcs_list.append((f2, f2_desc, f2_restrictions))
+
+cg.build_from_fn_list(funcs_list)
 print(cg.get_script())
 
 # print(cg.compile_script(cash_file_path='shared_cold_cov.cash', json_file_path='shared_cold_cov.json'))
 
 
-
-
-
-
-
-
-"""
-
-Output instantiation - enforcing transaction outputs 
-
-    bytes34 out1 = new OutputP2PKH(bytes8(10000), pkh);
-    bytes32 out2 = new OutputP2SH(bytes8(10000), hash160(tx.bytecode));
-    require(hash256(out1 + out2) == tx.hashOutputs);
-
-
-
-covenants - Restricting P2PKH recipients
-
-contract Escrow(bytes20 arbiter, bytes20 buyer, bytes20 seller) {
-    function spend(pubkey pk, sig s) {
-        require(hash160(pk) == arbiter);
-        require(checkSig(s, pk));
-
-        // Create and enforce outputs
-        int minerFee = 1000; // hardcoded fee
-        bytes8 amount = bytes8(int(bytes(tx.value)) - minerFee);
-        bytes34 buyerOutput = new OutputP2PKH(amount, buyer);
-        bytes34 sellerOutput = new OutputP2PKH(amount, seller);
-        require(tx.hashOutputs == hash256(buyerOutput) || tx.hashOutputs == hash256(sellerOutput);
-    }
-}
-
-
-contract Basic('for i in aaa print bytes20 i, ') {
-
-    function spend(pubkey pk, sig s) {
-        require(hash160(pk) == arbiter);
-        require(checkSig(s, pk));
-
-        // Create and enforce outputs
-        int minerFee = 1000; // hardcoded fee
-        bytes8 amount = bytes8(int(bytes(tx.value)) - minerFee);
-        bytes34 buyerOutput = new OutputP2PKH(amount, buyer);
-        bytes34 sellerOutput = new OutputP2PKH(amount, seller);
-        require(tx.hashOutputs == hash256(buyerOutput) || tx.hashOutputs == hash256(sellerOutput);
-    }
-}
-
-
-
-
-"""
