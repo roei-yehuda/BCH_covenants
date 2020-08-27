@@ -9,12 +9,11 @@ Avigail Suna; email ???
 Roei Yehuda; email ???
 
 The purpose of the code here is to implement a cashScript (https://cashscript.org/) covenants generator for BCH smart contracts.
-The class cashScript_cov_gen outputs a .cash file with the generated covenant smart contract.
+The class cov_gen outputs a .cash file with the generated covenant smart contract.
 """
 
 import os
 import copy
-
 
 # import os.path
 # import os.system
@@ -29,6 +28,9 @@ import copy
 
 
 class utils():
+    """
+    Generic helper methods
+    """
 
     def __init__(self):
         pass
@@ -67,49 +69,52 @@ class utils():
         return ''
 
 
-
-
 class cov_fn():
+    """
+    represents a single function in a contract
+    """
 
     def __init__(self, fn_name, desc_comment=None, miner_fee=1000):
-
+        """
+        init a function with name fn_name
+        :param fn_name: string
+        :param desc_comment: string - a description that will be written as a comment in the beginning of the function
+        :param miner_fee: int - while this is not a parameter unique to each function, we still might have to use it here
+        """
         self.fn_name = fn_name
         self.miner_fee = miner_fee
 
         self.fn_args = {}
         self.fn_vars = {}
-        self.constructor_args = {}
+        self.constructor_args = {}  # these will be added to the contract's constructor
         self.fn_lines = []
 
         # start by adding the desc_comment right at the start:
         if desc_comment is not None and desc_comment != '':
             self.fn_lines.append('/*')
             for l in desc_comment.split('\n'):
-                self.fn_lines.append(l)
+                self.fn_lines.append(l.strip())
             self.fn_lines.append('*/')
 
-    def _add_to_fn_args(self, type, name, description=''):
+    def _add_to_fn_args(self, type, name):
         """
-        Adding a single argument to the function's arguments.
+        Adding a single argument to the function's arguments
         :param type: string
         :param name: string
-        :param description: (optional) string - this is used for inner purposes, and will not be written to the output contract
         """
-        # we record the order of arrival with len(self.constructor_args.keys())
-        self.fn_args[name] = (type, name, len(self.fn_args.keys()), description)
+        self.fn_args[name] = (type, name)
 
     def _add_to_fn_vars(self, type, name):
         """
-        Adding a single argument to the function's arguments.
+        Adding a single argument to the function's variables
         :param type: string
         :param name: string
-        :param v: string
         """
         self.fn_vars[name] = (type, name)
 
     def _append_line_if_new(self, line):
         """
-        append to sel.fn_lines only if this line did not appear beforehand
+        append to self.fn_lines only if this line did not appear before
         :param line: string
         """
         do_append = True
@@ -128,22 +133,26 @@ class cov_fn():
         return len([k for k in self.fn_vars.keys() if k.startswith(prefix)])
 
     def _get_fn_args_text(self):
+        """
+        get the text for the fn arguments
+        :return:
+        """
         return ', '.join([self.fn_args[k][0] + ' ' + self.fn_args[k][1] for k in self.fn_args.keys()])
 
-    def _add_to_constructor(self, type, name, description=''):
+    def _add_to_constructor(self, type, name):
         """
-        Adding a single argument to the contract's constructor.
+        add a single argument to the contract's constructor.
         :param type: string
         :param name: string
-        :param description: (optional) string - this is used for inner purposes, and will not be written to the output contract
         """
         # we record the order of arrival with len(self.constructor_args.keys())
-        self.constructor_args[name] = (type, name, len(self.constructor_args.keys()), description)
+        self.constructor_args[name] = (type, name, len(self.constructor_args.keys()))
 
     def _get_fn_text(self):
         """
-        unindented
-        :return:
+        calculate the complete text for the function.
+        This is without indentation.
+        :return: string
         """
         fn_text = "function " + self.fn_name + "(" + self._get_fn_args_text() + ") {\n"
         fn_text += '\n'.join(self.fn_lines)
@@ -151,10 +160,20 @@ class cov_fn():
         return fn_text
 
     def get_fn_info(self):
+        """
+        Get the final info for this function
+        :return: tuple - (fn_text, fn_a4c) where fn_text is the complete function's text (WO indentation) and fn_a4c is
+                          a dictionary to be concatenated with cov_gen.constructor_args
+        """
         return self._get_fn_text(), self.constructor_args
 
     restrict_operators_kwargs_d = {'n':1}
     def restrict_operators(self, n=1):
+        """
+        restrict the operators of this function i.e. users who are allowed to communicate with it.
+        If no other restrictions are added, this is similar to the 'cold' function (and pkh) in Licho's Last Will
+        :param n: int - number of operators
+        """
 
         if n < 1:
             return
@@ -163,8 +182,7 @@ class cov_fn():
 
         for i in range(n):
             self._add_to_constructor(type="bytes20",
-                                     name="operator_{}_pkh_{}".format(i, self.fn_name),
-                                     description="operator".format(i))
+                                     name="operator_{}_pkh_{}".format(i, self.fn_name))
 
         self._add_to_fn_args('pubkey', 'pk')
         self._add_to_fn_args('sig', 's')
@@ -174,12 +192,16 @@ class cov_fn():
         self._append_line_if_new("require(checkSig(s, pk));")
 
     restrict_recipients_kwargs_d = {'n_PKH':1, 'n_SH':0, 'require_recipient_sig':False, 'include_all':False}
-    def restrict_recipients(self,
-                            n_PKH=1,
-                            n_SH=0,
-                            require_recipient_sig=False,
-                            include_all=False
-                            ):
+    def restrict_recipients(self, n_PKH=1, n_SH=0, require_recipient_sig=False, include_all=False):
+        """
+        restrict the recipients of funds from this contract
+        :param n_PKH: int - number of P2PKH recipients
+        :param n_SH: int - number of P2SH recipients
+        :param require_recipient_sig: bool - if True, then only a recipient may operate this function
+        :param include_all: bool - if True, the transaction must include ALL of the recipients in its output (by order
+                                    of insertion) and each must have an equal share.
+                                    If False, the transaction must include ANY ONE of the recipients.
+        """
         n = n_PKH + n_SH
         if n == 0:
             return
@@ -188,13 +210,11 @@ class cov_fn():
 
         for i in range(n_PKH):
             self._add_to_constructor(type="bytes20",
-                                     name="recepient_{}_pkh_{}".format(i, self.fn_name),
-                                     description="recepient_pkh")
+                                     name="recepient_{}_pkh_{}".format(i, self.fn_name))
 
         for i in range(n_SH):
             self._add_to_constructor(type="bytes20",
-                                     name="recepient_{}_sh_{}".format(i, self.fn_name),
-                                     description="recepient_sh")
+                                     name="recepient_{}_sh_{}".format(i, self.fn_name))
 
         self._add_to_fn_args('pubkey', 'pk')
         self._add_to_fn_args('sig', 's')
@@ -219,7 +239,8 @@ class cov_fn():
         j = self._count_fn_vars('intAmount_')
         if include_all and n > 1:
             # we assume all recipients get an equal share
-            self.fn_lines.append("int intAmount_{} = int((intTxVal - minerFee) / {});".format(j, n)) # todo maybe we need to do -1 ?
+            self.fn_lines.append("int intAmount_{} = int((intTxVal - minerFee) / {});".format(j, n))
+            self.fn_lines.append("require((intTxVal - minerFee) & {} == 0);".format(n))
         else:
             self.fn_lines.append("int intAmount_{} = intTxVal - minerFee;".format(j))
         self._add_to_fn_vars('int', 'intAmount_{}'.format(j))
@@ -229,7 +250,6 @@ class cov_fn():
             self.fn_lines.append("bytes34 outPKH_{} = new OutputP2PKH(amount, recepient_{}_pkh_{});".format(i, i, self.fn_name))
         for i in range(n_SH):
             self.fn_lines.append("bytes32 outSH_{} = new OutputP2SH(amount, recepient_{}_sh_{});".format(i, i, self.fn_name))
-        # todo - when the user is typing SH recipients adresses, allow him to type THIS_CONTRACT, in which case we need to write "hash160(tx.bytecode)"
 
         if include_all:
             sep = ' + '
@@ -243,6 +263,12 @@ class cov_fn():
 
     restrict_amount_kwargs_d = {'max_amount_per_tx': None, 'max_amount_per_recipient': None}
     def restrict_amount(self, max_amount_per_tx=None, max_amount_per_recipient=None):
+        """
+        restrict the amount of funds outputed from the contract by the transaction
+        :param max_amount_per_tx: int
+        :param max_amount_per_recipient: int
+        :return:
+        """
 
         if max_amount_per_tx is None and max_amount_per_recipient is None:
             return
@@ -270,7 +296,17 @@ class cov_fn():
             self.fn_lines.append("require(" + ' && '.join(["{} <= {}".format(k, str(max_amount_per_recipient)) for k in saved_intAmounts]) + ");")
 
     restrict_time_kwargs_d = {'min':None, 'max':None, 'time_limit':None, 'age_limit':None}
-    def restrict_time(self, min=None, max=None, time_limit=None, age_limit=None):   # todo - understand what the difference is...
+    def restrict_time(self, min=None, max=None, time_limit=None, age_limit=None):
+        """
+        restrict time locks concerning the transaction.
+        Note - at least one of the parameters (min, max) must not be None.
+        Additionaly, only one of the parameters (time_limit, age_limit) must not be None.
+        :param min: string
+        :param max: string
+        :param time_limit: bool - if True, we use tx.time
+        :param age_limit: bool - if True, we use tx.age
+        :return:
+        """
 
         if (min is None and max is None) or (time_limit is None and age_limit is None):
             return
@@ -288,70 +324,12 @@ class cov_fn():
             self.fn_lines.append("require({} <= {});".format(txT, str(max)))
 
 
-    # def restrict_P2PKH_recipients(self,
-    #                               n=1,
-    #                               require_recipient_sig=False,
-    #                               include_all=False
-    #                               ):
-    #
-    #     if n < 1:
-    #         return
-    #
-    #     self.fn_lines.append("// *** restrict P2PKH recipients")
-    #
-    #     for i in range(n):
-    #         self._add_to_constructor(type="bytes20",
-    #                                  name="recepient_{}_pkh_{}".format(i, self.fn_name),
-    #                                  description="recepient")
-    #
-    #     self._add_to_fn_args('pubkey', 'pk')
-    #     self._add_to_fn_args('sig', 's')
-    #
-    #     if require_recipient_sig:
-    #         self.fn_lines.append("// the tx can only be signed by one of the recipients")
-    #         req_pkh_cond = ' || '.join(["hash160(pk) == recepient_{}_pkh_{}".format(i, self.fn_name) for i in range(n)])
-    #         self.fn_lines.append("require(" + req_pkh_cond + ");")
-    #     else:
-    #         self.fn_lines.append("// the tx can be signed by anyone (after all, money can only be sent to the correct address)")
-    #     self._append_line_if_new("require(checkSig(s, pk));")
-    #
-    #     self.fn_lines.append("// Create and enforce outputs")
-    #
-    #     if self._count_fn_vars('minerFee') == 0:
-    #         self.fn_lines.append("int minerFee = " + str(self.miner_fee) + "; // hardcoded fee")
-    #         self._add_to_fn_vars('int', 'minerFee')
-    #     if self._count_fn_vars('intTxVal') == 0:
-    #         self.fn_lines.append("int intTxVal = int(bytes(tx.value));")
-    #         self._add_to_fn_vars('int', 'intTxVal')
-    #
-    #     j = self._count_fn_vars('intAmount_')
-    #     if include_all:
-    #         # we assume all recipients get an equal amount
-    #         self.fn_lines.append("int intAmount_{} = int((intTxVal - minerFee) / {})".format(j, n))
-    #         # amount_str = "int((intTxVal - minerFee) / {})".format(n)    # todo maybe we need to do -1 ?
-    #     else:
-    #         # amount = "int(bytes(tx.value)) - minerFee"
-    #         # amount_str = "intTxVal - minerFee"
-    #         self.fn_lines.append("int intAmount_{} = intTxVal - minerFee".format(j))
-    #     self._add_to_fn_vars('int', 'intAmount_{}'.format(j))
-    #     self.fn_lines.append("bytes8 amount = bytes8(intAmount_{});".format(j))
-    #
-    #     for i in range(n):
-    #         self.fn_lines.append("bytes34 out_{} = new OutputP2PKH(amount, recepient_{}_pkh_{});".format(i, i, self.fn_name))
-    #
-    #     if include_all:
-    #         hashOutputs_cond = 'tx.hashOutputs == hash256(' + ' + '.join(['out_{}'.format(i) for i in range(n)]) + ')'
-    #     else:
-    #         hashOutputs_cond = ' || '.join(["tx.hashOutputs == hash256(out_{})".format(i) for i in range(n)])
-    #     self.fn_lines.append("require(" + hashOutputs_cond + ");")
-
-# f1 = cov_fn('f1')
-# f_fn = cov_fn.restrict_time
-# f2 = cov_fn('f2')
-# f2.f_fn()
-
 
 class cov_gen():
+    """
+    This class is responsible for the construction of a cashScript covenant smart contrat.
+    Once completed, a generated script can be saved to file and even be compiled by cashc.
+    """
 
     cov_init_kwargs_d = {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''}
     def __init__(self, contract_name='cov', cashScript_pragma='0.4.0', miner_fee=1000, intro_comment=''):
@@ -370,23 +348,22 @@ class cov_gen():
         self.intro_comment = intro_comment
 
         # self.constructor_args is a dictionary with arguments names as keys and tuples like
-        # (type, name, index, description) as values. Saved in a dictionary in order to avoid having two arguments with
+        # (type, name, index) as values. Saved in a dictionary in order to avoid having two arguments with
         # the same name, while keeping track of order of arrival (index in constructor)
         self.constructor_args = {}
 
-        # self.functions is a dictionary with function names as keys and tuples like (fn_text, fn_description) as values
+        # self.functions is a dictionary with function names as keys and their respective fn_text as values.
         # saved in a dictionary in order to avoid having two functions with the same name
         self.functions = {}
 
-    def _add_to_constructor(self, type, name, description=''):
+    def _add_to_constructor(self, type, name):
         """
         Adding a single argument to the contract's constructor.
         :param type: string
         :param name: string
-        :param description: (optional) string - this is used for inner purposes, and will not be written to the output contract
         """
         # we record the order of arrival with len(self.constructor_args.keys())
-        self.constructor_args[name] = (type, name, len(self.constructor_args.keys()), description)
+        self.constructor_args[name] = (type, name, len(self.constructor_args.keys()))
 
     def _get_constructor_text(self):
         """
@@ -398,14 +375,13 @@ class cov_gen():
             key=lambda t: t[2])  # '2' since the index of the constructor_arg is the third argument in each tuple
         return ', '.join([sorted_args_tuples[i][0] + ' ' + sorted_args_tuples[i][1] for i in range(len(sorted_args_tuples))])
 
-    def _add_to_functions(self, fn_name, fn_text, description=''):
+    def _add_to_functions(self, fn_name, fn_text):
         """
         Adding a single function to the contract's body.
         :param fn_name: string
         :param fn_text: string
-        :param description: (optional) string - this is used for inner purposes, and will not be written to the output contract
         """
-        self.functions[fn_name] = (fn_text, description)
+        self.functions[fn_name] = fn_text
 
     def _get_functions_text(self):
         """
@@ -477,7 +453,6 @@ class cov_gen():
 
         self.save_script(cash_file_path)
         os.system("cashc " + cash_file_path + " -o " + json_file_path)
-        # subprocess.run(["cashc ", cash_file_path, " -o ", json_file_path])
 
         byte_code = utils().get_byte_code_from_artifact(json_file_path)
 
@@ -517,8 +492,7 @@ class cov_gen():
 
         for k in fn_a4c_dict.keys():
             self._add_to_constructor(type= fn_a4c_dict[k][0],
-                                     name= fn_a4c_dict[k][1],
-                                     description= fn_a4c_dict[k][3])
+                                     name= fn_a4c_dict[k][1])
 
         self._add_to_functions(fn_name, fn_text)
 
@@ -533,82 +507,6 @@ class cov_gen():
         """
         for fn_tup in l:
             self.new_fn(fn_tup[0], fn_tup[1], fn_tup[2])
-
-
-    # def basic_covenant(self,
-    #                    n_recipients=1,
-    #                    p2sh_recipients_indices=[],
-    #                    include_any=True):
-    #
-    #     # todo - maybe we need to check that the input is valid
-    #
-    #     fn_name = 'spend'
-    #
-    #     p2pkh_recipients_indices = [i for i in list(range(n_recipients)) if i not in p2sh_recipients_indices]
-    #
-    #     # todo - note that if this function has been called once, then we need to change the format of its constructor args: otherwise it'll just use ""recepient_{}_pkh"" again and it'll collide with the args created on the first run... they have to have a new unique name!
-    #     #
-    #
-    #     for i in p2pkh_recipients_indices:
-    #         self._add_to_constructor(type="bytes20",
-    #                                  name="recepient_{}_pkh".format(i),
-    #                                  description="allowed_recepient")
-    #
-    #     fn_lines = []
-    #     fn_lines.append("function " + fn_name + "(pubkey pk, sig s) {")
-    #
-    #     # # this is commented out because it is not necessary to check *who* the signer is. But useful so don't delete yet :)
-    #     # req_pkh_cond = ' || '.join(["hash160(pk) == recepient_{}_pkh".format(i) for i in p2pkh_recipients_indices])
-    #     # fn_lines.append("require(" + req_pkh_cond + ");")
-    #
-    #     fn_lines.append("require(checkSig(s, pk));")
-    #     fn_lines.append("// Create and enforce outputs")
-    #     fn_lines.append("int minerFee = " + str(self.miner_fee) + "; // hardcoded fee")
-    #     amount = "int(bytes(tx.value)) - minerFee" if include_any else "int((int(bytes(tx.value)) - minerFee) / {})".format(
-    #         n_recipients)
-    #     fn_lines.append("bytes8 amount = bytes8(" + amount + ");")
-    #
-    #     for i in range(n_recipients):
-    #         if i in p2pkh_recipients_indices:
-    #             fn_lines.append("bytes34 out_{} = new OutputP2PKH(amount, recepient_{}_pkh);".format(i, i))
-    #         else:  # this means i is in p2sh_recipients_indices
-    #             fn_lines.append("bytes32 out_{} = new OutputP2SH(amount, recepient_{}_pkh);".format(i, i))  # todo
-    #
-    #     if include_any:
-    #         hashOutputs_cond = ' || '.join(["tx.hashOutputs == hash256(out_{})".format(i) for i in range(n_recipients)])
-    #     else:
-    #         hashOutputs_cond = 'tx.hashOutputs == hash256(' + ' + '.join(
-    #             ['out_{}'.format(i) for i in range(n_recipients)]) + ')'
-    #     fn_lines.append("require(" + hashOutputs_cond + ");")
-    #
-    #     fn_lines.append('}')
-    #
-    #     fn_text = '\n'.join(fn_lines)
-    #     self._add_to_functions(fn_name, fn_text, description='basic_covenant')
-    #
-    # def allow_cold(self, n=1):
-    #     """
-    #     This method basically allows easy and unlimited access to the funds in the contract for n people defined
-    #     in the constructor.
-    #     :param n: int
-    #     """
-    #
-    #     fn_name = 'cold'
-    #
-    #     for i in range(n):
-    #         self._add_to_constructor(type="bytes20",
-    #                                  name="cold_{}_pkh".format(i),
-    #                                  description="cold_{}".format(i))
-    #
-    #     fn_lines = []
-    #     fn_lines.append("function " + fn_name + "(pubkey pk, sig s) {")
-    #     req_pkh_cond = ' || '.join(["hash160(pk) == cold_{}_pkh".format(i) for i in range(n)])
-    #     fn_lines.append("require(" + req_pkh_cond + ");")
-    #     fn_lines.append("require(checkSig(s, pk));")
-    #     fn_lines.append('}')
-    #
-    #     fn_text = '\n'.join(fn_lines)
-    #     self._add_to_functions(fn_name, fn_text, description='cold')
 
 
 
