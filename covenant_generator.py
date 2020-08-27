@@ -353,6 +353,7 @@ class cov_fn():
 
 class cov_gen():
 
+    cov_init_kwargs_d = {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''}
     def __init__(self, contract_name='cov', cashScript_pragma='0.4.0', miner_fee=1000, intro_comment=''):
         """
         Initializing a cov_gen.
@@ -615,7 +616,7 @@ class cov_gen():
 # the manager (which is in charge of the CLI) will keep a dict with all the data:
 
 cov_d = {
-    'init': {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''},
+    'init_params': {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''},
     'funcs_list': []
      }
 
