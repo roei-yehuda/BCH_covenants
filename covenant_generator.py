@@ -220,9 +220,9 @@ class cov_fn():
         j = self._count_fn_vars('intAmount_')
         if include_all and n > 1:
             # we assume all recipients get an equal share
-            self.fn_lines.append("int intAmount_{} = int((intTxVal - minerFee) / {})".format(j, n)) # todo maybe we need to do -1 ?
+            self.fn_lines.append("int intAmount_{} = int((intTxVal - minerFee) / {});".format(j, n)) # todo maybe we need to do -1 ?
         else:
-            self.fn_lines.append("int intAmount_{} = intTxVal - minerFee".format(j))
+            self.fn_lines.append("int intAmount_{} = intTxVal - minerFee;".format(j))
         self._add_to_fn_vars('int', 'intAmount_{}'.format(j))
         self.fn_lines.append("bytes8 amount = bytes8(intAmount_{});".format(j))
 
@@ -284,7 +284,7 @@ class cov_fn():
 
         txT = "tx.time" if time_limit is not None else "tx.age"
         if min is not None:
-            self.fn_lines.append("require({} <= {});".format(str(min), txT))
+            self.fn_lines.append("require({} >= {});".format(txT, str(min)))
         if max is not None:
             self.fn_lines.append("require({} <= {});".format(txT, str(max)))
 
@@ -641,6 +641,6 @@ funcs_list.append((f2, f2_desc, f2_restrictions))
 cg.build_from_fn_list(funcs_list)
 print(cg.get_script())
 
-# print(cg.compile_script(cash_file_path='shared_cold_cov.cash', json_file_path='shared_cold_cov.json'))
+# print(cg.compile_script(cash_file_path='cov.cash', json_file_path='cov.json'))
 
 
