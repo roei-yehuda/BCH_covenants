@@ -153,7 +153,6 @@ class cov_fn():
     def get_fn_info(self):
         return self._get_fn_text(), self.constructor_args
 
-
     restrict_operators_kwargs_d = {'n':1}
     def restrict_operators(self, n=1):
 
@@ -493,7 +492,7 @@ class cov_gen():
 
     def new_fn(self, fn_name, desc_comment=None, restrictions=[]):
         """
-        add a new function to current contract
+        adds a new function to current contract
         :param fn_name: string
         :param desc_comment: string
         :param restrictions: list of tuples (r, kwargs_dict) where r is a string describing one of the restrict
@@ -524,7 +523,7 @@ class cov_gen():
 
     def build_from_fn_list(self, l):
         """
-        build the contract's body from a list of functions info
+        builds the contract's body from a list of functions info
         :param l: list of tuples (fn_name, fn_desc, fn_restrictions) where:
                     fn_name: string
                     fn_desc: string
@@ -613,30 +612,42 @@ class cov_gen():
 
 
 
+# the manager (which is in charge of the CLI) will keep a dict with all the data:
+
+cov_d = {
+    'init': {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''},
+    'funcs_list': []
+     }
 
 
-cg = cov_gen()
+
+
+
+cg = cov_gen('my_first_cov')
 funcs_list = []
 
 f1 = 'cold'
 f1_desc = 'this is a cold func'
 f1_restrictions = []
+
 r, r_d = 'operators', copy.deepcopy(cov_fn.restrict_operators_kwargs_d) # {'n':1}
-r_d['n'] = 1
+r_d['n'] = 2
 f1_restrictions.append((r, r_d))
-# r, r_d = 'time', copy.deepcopy(cov_fn.restrict_time_kwargs_d) # {'min':None, 'max':None, 'time_limit':None, 'age_limit':None}
-# r_d['min'] = '30 days'
-# r_d['age_limit'] = True
-# f1_restrictions.append((r, r_d))
+
+r, r_d = 'time', copy.deepcopy(cov_fn.restrict_time_kwargs_d) # {'min':None, 'max':None, 'time_limit':None, 'age_limit':None}
+r_d['min'] = '30 days'
+r_d['age_limit'] = True
+f1_restrictions.append((r, r_d))
+
 funcs_list.append((f1, f1_desc, f1_restrictions))
 
-f2 = 'spend'
-f2_desc = ''
-f2_restrictions = []
-r, r_d = 'recipients', copy.deepcopy(cov_fn.restrict_recipients_kwargs_d) # {'n_PKH':1, 'n_SH':0, 'require_recipient_sig':False, 'include_all':False}
-r_d['n_PKH']=2
-f2_restrictions.append((r, r_d))
-funcs_list.append((f2, f2_desc, f2_restrictions))
+# f2 = 'spend'
+# f2_desc = ''
+# f2_restrictions = []
+# r, r_d = 'recipients', copy.deepcopy(cov_fn.restrict_recipients_kwargs_d) # {'n_PKH':1, 'n_SH':0, 'require_recipient_sig':False, 'include_all':False}
+# r_d['n_PKH']=2
+# f2_restrictions.append((r, r_d))
+# funcs_list.append((f2, f2_desc, f2_restrictions))
 
 cg.build_from_fn_list(funcs_list)
 print(cg.get_script())
