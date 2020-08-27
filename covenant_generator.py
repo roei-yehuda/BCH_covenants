@@ -612,47 +612,37 @@ class cov_gen():
 
 
 
+if __name__ == '__main__':
 
-# the manager (which is in charge of the CLI) will keep a dict with all the data:
+    cg = cov_gen('my_first_cov')
+    funcs_list = []
 
-cov_d = {
-    'init_params': {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''},
-    'funcs_list': []
-     }
+    f1 = 'cold'
+    f1_desc = 'this is a cold func'
+    f1_restrictions = []
 
+    r, r_d = 'operators', copy.deepcopy(cov_fn.restrict_operators_kwargs_d) # {'n':1}
+    r_d['n'] = 2
+    f1_restrictions.append((r, r_d))
 
+    r, r_d = 'time', copy.deepcopy(cov_fn.restrict_time_kwargs_d) # {'min':None, 'max':None, 'time_limit':None, 'age_limit':None}
+    r_d['min'] = '30 days'
+    r_d['age_limit'] = True
+    f1_restrictions.append((r, r_d))
 
+    funcs_list.append((f1, f1_desc, f1_restrictions))
 
+    # f2 = 'spend'
+    # f2_desc = ''
+    # f2_restrictions = []
+    # r, r_d = 'recipients', copy.deepcopy(cov_fn.restrict_recipients_kwargs_d) # {'n_PKH':1, 'n_SH':0, 'require_recipient_sig':False, 'include_all':False}
+    # r_d['n_PKH']=2
+    # f2_restrictions.append((r, r_d))
+    # funcs_list.append((f2, f2_desc, f2_restrictions))
 
-cg = cov_gen('my_first_cov')
-funcs_list = []
+    cg.build_from_fn_list(funcs_list)
+    print(cg.get_script())
 
-f1 = 'cold'
-f1_desc = 'this is a cold func'
-f1_restrictions = []
-
-r, r_d = 'operators', copy.deepcopy(cov_fn.restrict_operators_kwargs_d) # {'n':1}
-r_d['n'] = 2
-f1_restrictions.append((r, r_d))
-
-r, r_d = 'time', copy.deepcopy(cov_fn.restrict_time_kwargs_d) # {'min':None, 'max':None, 'time_limit':None, 'age_limit':None}
-r_d['min'] = '30 days'
-r_d['age_limit'] = True
-f1_restrictions.append((r, r_d))
-
-funcs_list.append((f1, f1_desc, f1_restrictions))
-
-# f2 = 'spend'
-# f2_desc = ''
-# f2_restrictions = []
-# r, r_d = 'recipients', copy.deepcopy(cov_fn.restrict_recipients_kwargs_d) # {'n_PKH':1, 'n_SH':0, 'require_recipient_sig':False, 'include_all':False}
-# r_d['n_PKH']=2
-# f2_restrictions.append((r, r_d))
-# funcs_list.append((f2, f2_desc, f2_restrictions))
-
-cg.build_from_fn_list(funcs_list)
-print(cg.get_script())
-
-# print(cg.compile_script(cash_file_path='cov.cash', json_file_path='cov.json'))
+    # print(cg.compile_script(cash_file_path='cov.cash', json_file_path='cov.json'))
 
 
