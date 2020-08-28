@@ -15,8 +15,13 @@ HIGHLIGHT = 'green'
 
 class cov_gen_CLI():
 
-    intro = "Welcome to the BCH covenant app!" \
-            "vds" \
+    intro = "Welcome to the BCH Covenant Generator!\n" \
+            "This application facilitates the creation, deployment and use of smart contracts in BCH.\n" \
+            "\n" \
+            "At any given moment you may type '-i' for more information about the specific point you are at,\n" \
+            "as well as '-h' to get general instructions for usage of this command line interface (CLI).\n" \
+            "If this is your first time here, you are encouraged to try both now.\n" \
+            "\n" \
             ""
 
 
@@ -24,18 +29,12 @@ class cov_gen_CLI():
 
         # variables for the generation of cov_gen
         self.cov_init_args = copy.deepcopy(cov_gen.cov_init_kwargs_d)   # {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''}
-        self.funcs_list = []
+        self.cov_funcs_list = []
 
         # global commands - the user may input these commands at any point
         self.globals = ['-i', '-h', '-exit', '-clear']
 
         self.run()
-
-    # def print_comment(self, comment: str):
-    #     print(colored(comment, 'yellow'))
-    #
-    # def print_error(self, err: str):
-    #     print(colored(err, 'red'))
 
     def print(self, s: str, c: str=None):
         if c is not None:
@@ -44,6 +43,12 @@ class cov_gen_CLI():
             print(colored(s, REG))
 
     def run(self):
+
+        def print_intro():
+            re.split('-i|-h', intro)
+
+
+
         # print intro:
         # Rs = ['-o- operators', '-r- recipients', '-a- amount', '-t- time']
         options = ['operators - could key participants ',
@@ -82,10 +87,9 @@ class cov_gen_CLI():
 
     def in_between_fns(self):
         # add functions in a while loop
-        create_f = self._y_n_question('would you like to add a function?') == 'y'
-        while create_f:
+        create_f = lambda: self._y_n_question('would you like to add a function?') == 'y'
+        while create_f():
             self.add_fn()
-            create_f = self._y_n_question('would you like to add another function?') == 'y'
 
     def parse_input(self, name='', tp=str, default=None, choices=None,
                     i_msg='Sorry, no more information is provided. You can always try -h'):
@@ -234,20 +238,27 @@ class cov_gen_CLI():
             add_restriction()
             create_f = self._y_n_question('would you like to add a restriction?') == 'y'
 
-        self.funcs_list.append((fn_name, fn_desc, fn_restrictions))
+        self.cov_funcs_list.append((fn_name, fn_desc, fn_restrictions))
 
     def generate_cov(self):
         cg = cov_gen(**self.cov_init_args)
-        cg.build_from_fn_list(self.funcs_list)
+        cg.build_from_fn_list(self.cov_funcs_list)
         print(cg.get_script())
         return cg
 
 
+
+
+
+if __name__ == '__main__':
+    cov_gen_CLI()
+
+
+
 """
-Avigail's tasks:
-- tx.time vs tx.age
-- add an option to remove fn
-"""
+# Avigail's tasks:
+# - tx.time vs tx.age
+# - add an option to remove fn
 
 
 def enter_param(name='', tp=str, has_default=True, default=None):
@@ -294,11 +305,4 @@ def my_main():
     pass
 
 
-if __name__ == '__main__':
-    # my_main()
-
-    cov_gen_CLI()
-
-"""
-start
 """

@@ -29,12 +29,11 @@ main();
         self.m_lines = []   # main scope code
 
 
+
+
     def new(self, file_path: str = '_temp.js'):
         self.f = file_path
         self.lines = []
-
-    def print(self, s):
-        self.lines.append('console.log({});'.format(s))
 
     def get_script(self):
         """
@@ -44,7 +43,8 @@ main();
 
         full_script = []
 
-        full_script.append("import { BITBOX } from 'bitbox-sdk';")
+        # full_script.append("import { BITBOX } from 'bitbox-sdk';")
+        full_script.append("import { BITBOX } from 'bitbox-sdk/lib/BITBOX';")    # this works when using TypeScript
         full_script.append("import { Contract, SignatureTemplate } from 'cashscript';")
         full_script = full_script + self.g_lines
         full_script.append("async function main() {")
@@ -59,5 +59,14 @@ main();
             print(self.get_script(), file=f)
 
     def run(self):
+        self.save()
         os.system("node " + self.f)
 
+
+
+if __name__ == '__main__':
+    jsb = js_bridge()
+    s = 'Hello JS!'
+    jsb.m_lines.append("console.log('{}');".format(s))
+    # print(jsb.get_script())
+    jsb.run()

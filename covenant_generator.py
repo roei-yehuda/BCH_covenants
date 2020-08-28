@@ -525,7 +525,7 @@ if __name__ == '__main__':
     # r, r_d = 'recipients', copy.deepcopy(cov_fn.restrict_recipients_kwargs_d) # {'n_PKH':1, 'n_SH':0, 'require_recipient_sig':False, 'include_all':False}
     # r_d['n_PKH']=2
     # f2_restrictions.append((r, r_d))
-    # funcs_list.append((f2, f2_desc, f2_restrictions))
+    # cov_funcs_list.append((f2, f2_desc, f2_restrictions))
 
     cg.build_from_fn_list(funcs_list)
     print(cg.get_script())
