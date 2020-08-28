@@ -14,6 +14,7 @@ The class cov_gen outputs a .cash file with the generated covenant smart contrac
 
 import os
 import copy
+import json
 
 # import os.path
 # import os.system
@@ -55,18 +56,6 @@ class utils():
         indent all lines except the first and last lines
         """
         return self.indent(s, tab, indices=list(range(s.count('\n') + 1))[1:-1])
-
-    def get_byte_code_from_artifact(self, json_path):
-        """
-        read an artifact json file, an output of cashc compilation, and return the bytecode
-        :param json_path: string
-        :return: string - if no bytecode is found, this methods returns an empty string
-        """
-        with open(json_path, "r") as f:
-            for line in f:
-                if line.split(':')[0].strip(' \t\",') == 'bytecode':
-                    return line.split(':')[1].strip(' \t\",\n')
-        return ''
 
 
 class cov_fn():
@@ -135,7 +124,6 @@ class cov_fn():
     def _get_fn_args_text(self):
         """
         get the text for the fn arguments
-        :return:
         """
         return ', '.join([self.fn_args[k][0] + ' ' + self.fn_args[k][1] for k in self.fn_args.keys()])
 
@@ -260,6 +248,7 @@ class cov_fn():
             all_outs = ["tx.hashOutputs == hash256(outPKH_{})".format(i) for i in range(n_PKH)] + ["tx.hashOutputs == hash256(outSH_{})".format(i) for i in range(n_SH)]
             hashOutputs_cond = sep.join(all_outs)
         self.fn_lines.append("require(" + hashOutputs_cond + ");")
+
 
     restrict_amount_kwargs_d = {'max_amount_per_tx': None, 'max_amount_per_recipient': None}
     def restrict_amount(self, max_amount_per_tx=None, max_amount_per_recipient=None):
@@ -405,7 +394,7 @@ class cov_gen():
             output = utils().indent(output, indices=lines_to_indent)
             return output
 
-        return '\n\n'.join([indent_fn(fn_tup[0]) for fn_tup in self.functions.values()])
+        return '\n\n'.join([indent_fn(fn_text) for fn_text in self.functions.values()])
 
     def _get_intro_comment_text(self):
         """
@@ -454,7 +443,9 @@ class cov_gen():
         self.save_script(cash_file_path)
         os.system("cashc " + cash_file_path + " -o " + json_file_path)
 
-        byte_code = utils().get_byte_code_from_artifact(json_file_path)
+        with open(json_file_path) as f:
+            data = json.load(f)
+        byte_code = data['bytecode']
 
         if delete_cash_file_later and os.path.exists(cash_file_path):
             os.remove(cash_file_path)
@@ -463,8 +454,6 @@ class cov_gen():
             os.remove(json_file_path)
 
         return byte_code
-
-
 
     def new_fn(self, fn_name, desc_comment=None, restrictions=[]):
         """
