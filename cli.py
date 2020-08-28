@@ -1,63 +1,47 @@
 # this is the command line interface for our covenant generator
-from covenant_generator import cov_gen, cov_fn
+from covenant_generator import *
 from termcolor import colored
 import copy
 import sys
 
-# import click
 
-# @click.group()
-# @click.version_option()
-# def cli():
-#     pass #Entry Point
-#
-# @cli.group()
-# @click.pass_context
-# def cloudflare(ctx):
-#     pass
-#
-# @click.option('--contract_name', prompt=True, default='cov', show_default=True)
-# @click.option('--cashscript_pragma', prompt=True, default='0.4.0', show_default=True)
-# @click.option('--miner_fee', prompt=True, default=1000, show_default=True)
-# @click.option('--intro_comment', prompt=True, default='', show_default=True)
-#
-# @click.command
-# def create_cov_gen(contract_name, cashscript_pragma, miner_fee, intro_comment):
-#     my_cov = cov_gen(contract_name, cashscript_pragma, miner_fee, intro_comment)
-#     print(contract_name, cashscript_pragma, miner_fee, intro_comment, sep='\n')
-#     print(my_cov.contract_name)
-#
-# @click.command
-# def my_main():
-#     options = 'could - could key participants \n' \
-#               'hot - hot key participants'
-#     init_str = 'Hello, \n' \
-#                'what restrictions would you like to put on your money in BCH? \n' \
-#                'your options are: \n\n' + options + '\n\nlets start!\n'
-#
-#     print(init_str)
-#     create_cov_gen()
+# print colors:
+REG = 'white'
+ERR = 'red'
+IN = 'yellow'
+HIGHLIGHT = 'green'
+
 
 
 class cov_gen_CLI():
 
+    intro = "Welcome to the BCH covenant app!" \
+            "vds" \
+            ""
+
+
     def __init__(self):
 
-        # creating covenant
-        # {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''}
-        self.cov_init_args = copy.deepcopy(cov_gen.cov_init_kwargs_d)
+        # variables for the generation of cov_gen
+        self.cov_init_args = copy.deepcopy(cov_gen.cov_init_kwargs_d)   # {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''}
         self.funcs_list = []
 
-        # global commands - these are commands that the user may input at any point
+        # global commands - the user may input these commands at any point
         self.globals = ['-i', '-h', '-exit', '-clear']
 
         self.run()
 
-    def print_comment(self, comment: str):
-        print(colored(comment, 'yellow'))
+    # def print_comment(self, comment: str):
+    #     print(colored(comment, 'yellow'))
+    #
+    # def print_error(self, err: str):
+    #     print(colored(err, 'red'))
 
-    def print_error(self, err: str):
-        print(colored(err, 'red'))
+    def print(self, s: str, c: str=None):
+        if c is not None:
+            print(colored(s, c))
+        else:
+            print(colored(s, REG))
 
     def run(self):
         # print intro:
@@ -69,7 +53,7 @@ class cov_gen_CLI():
         intro = 'Hello, \n' \
                 'what restrictions would you like to put on your money in BCH? \n' \
                 'your options are: \n\n{}\n\nlets start!\n'.format('\n'.join(options))
-        self.print_comment(intro)
+        self.print(intro)
         # set init
         self.set_init()
         # in_between_fns
@@ -79,19 +63,19 @@ class cov_gen_CLI():
 
     def set_init(self):
         # {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''}
-        self.print_comment('name your contract:')
+        self.print('name your contract:', IN)
         self.cov_init_args['contract_name'] = self.parse_input(name='contract name with no spaces', tp=str,
                                                                default='cov', choices=None,
                                                                i_msg='pick a contract name with no spaces')
-        self.print_comment('which cashScript_pragma would you like to use?')
+        self.print('which cashScript_pragma would you like to use?', IN)
         self.cov_init_args['cashScript_pragma'] = self.parse_input(name='cashScript pragma', tp=str,
                                                                    default='0.4.0', choices=None,
                                                                    i_msg='from which pragma would you like to run')
-        self.print_comment('miner fee for deployment, a two low fee results in your contract not being excepted')
+        self.print('miner fee for deployment, a two low fee results in your contract not being excepted', IN)
         self.cov_init_args['miner_fee'] = self.parse_input(name='miner fee', tp=str,
                                                            default=1000, choices=None,
                                                            i_msg='miner fee for deploying the contract')
-        self.print_comment("if you'd like to enter a comment do so now, otherwise just press enter")
+        self.print("if you'd like to enter a comment do so now, otherwise just press enter", IN)
         self.cov_init_args['intro_comment'] = self.parse_input(name='intro comment', tp=str, default='', choices=None,
                                                                i_msg='what comment would you like to enter?')
         return
@@ -112,7 +96,7 @@ class cov_gen_CLI():
         # help and global functions
         if my_input in self.globals:
             if my_input == '-i':
-                self.print_comment(i_msg)
+                self.print(i_msg)
             if my_input == '-h':
                 self._h()
             if my_input == '-exit':
@@ -135,16 +119,16 @@ class cov_gen_CLI():
                 if my_input_in_tp in choices:
                     return my_input_in_tp
                 else:
-                    self.print_error('Oops! wrong input, your options are {}:'.format(str(choices)))
+                    self.print('Oops! wrong input, your options are {}:'.format(str(choices)), ERR)
                     self.parse_input(name, tp, default, choices, i_msg)
             return my_input_in_tp
         except ValueError:
-            self.print_error('Oops! {} is not of type {}, try again:'.format(str(my_input), str(tp)))
+            self.print('Oops! {} is not of type {}, try again:'.format(str(my_input), str(tp)), ERR)
             self.parse_input(name, tp, default, choices, i_msg)
 
     def _h(self):
         """ help information global """
-        self.print_comment(' -h: help\n-exit: exit and close\n-clear: clear all the functions without exiting\n'
+        self.print(' -h: help\n-exit: exit and close\n-clear: clear all the functions without exiting\n'
                            '-i information about this specific function')
 
     def _exit(self):
@@ -157,7 +141,7 @@ class cov_gen_CLI():
         pass
 
     def _y_n_question(self, question: str):
-        self.print_comment(question)
+        self.print(question, IN)
         return self.parse_input(name='y or n', tp=str, default=None, choices=['y', 'n'],
                                 i_msg='{}? type y or n and then enter)'.format(question))
 
@@ -205,17 +189,17 @@ class cov_gen_CLI():
                                        i_msg='pick a time limitation, before a certain time passes (min), or after (max)')
         r_d[r_d_min_max] = self.parse_input(name='time limitation [number][time stamp]', tp=str, default=None,
                                             i_msg='pick a time limitation a number and then a time stamp, for example "30 days"')
-        self.print_comment('which type of time limit would you like to use? time or age?')
+        self.print('which type of time limit would you like to use? time or age?', IN)
         r_d_typ_lim = self.parse_input(name='type of time limit', tp=str, default=None, choices=['time', 'age'],
                                        i_msg='pick a type of time limitation, time - absolute, age - relative')
         r_d['{}_limit'.format(r_d_typ_lim)] = True
         return r_d
 
     def add_fn(self):
-        self.print_comment('pick function name - No spaces')
+        self.print('pick function name - No spaces', IN)
         fn_name = self.parse_input(name='function name', tp=str, default=None,
                                    i_msg='write a name for your function and then click enter:')
-        self.print_comment('enter function description')
+        self.print('enter function description', IN)
         fn_desc = self.parse_input(name='function description', tp=str, default=None,
                                    i_msg='write a description for your function and then click enter:')
 
@@ -226,7 +210,7 @@ class cov_gen_CLI():
             restrict_txt = 'which restriction(s) would you like to apply?\n' \
                            'your options are:\n{}' \
                            '\ntype the first letter of one option and then click enter'.format('\n'.join(Rs))
-            self.print_comment(restrict_txt)
+            self.print(restrict_txt, IN)
             r = self.parse_input(name='restriction', tp=str, default=None, choices=['o', 'r', 'a', 't'],
                                  i_msg='type the first letter of one option and then click enter:\n{}'.format('\n'.join(Rs)))
             if r == 'o':
