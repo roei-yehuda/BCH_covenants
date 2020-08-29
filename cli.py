@@ -13,10 +13,45 @@ HIGHLIGHT = 'green'
 
 
 
+class js_bridge():
+
+    def __init__(self):
+        self.args = {
+            'NETWORK': 'testnet',
+            'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
+            'TESTNET_API': '',  # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
+            'W_JSON': 'wallet.json',
+            'MNEMONIC': '',
+            'CHILD_I': 0,
+            'CASH_F': 'cov.cash',
+            'ARTIFACT_F': 'cov.json',
+            'C_JSON': '_cov_info.json',
+            'DO_COMPILE': 'true',
+            'CONSTRUCTOR_ARGS': '',
+            'TX_FUNC': '',
+            'MAIN': ''
+        }
+        self.js_template_path = 'js_bridge_template'
+        self.js_temp_code_path = '_temp_js_code.ts'
+
+    def run(self):
+
+        with open(self.js_template_path, mode='r') as f:
+            js_code = f.read()
+
+        for k in self.args.keys():
+            js_code = js_code.replace(self.args[k][0], self.args[k][1])
+
+        with open(self.js_temp_code_path, "w") as f:
+            print(js_code, file=f)
+
+        os.system("ts-node " + self.js_temp_code_path)
+
+
 class cov_gen_CLI():
 
     intro = "Welcome to the BCH Covenant Generator!\n" \
-            "This application facilitates the creation, deployment and use of smart contracts in BCH.\n" \
+            "This program facilitates the creation, deployment and use of smart contracts in BCH.\n" \
             "\n" \
             "At any given moment you may type '-i' for more information about the specific point you are at,\n" \
             "as well as '-h' to get general instructions for usage of this command line interface (CLI).\n" \

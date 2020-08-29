@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6c103c48-6bb0-4c29-9a45-9629b69255c0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js_bridge_template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/covenant_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/covenant_generator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/covs_generator/example_contrat.cash" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/js_bridge.py" beforeDir="false" afterPath="$PROJECT_DIR$/js_bridge.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -22,40 +21,43 @@
     <session id="-1933772567">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="7" />
-          <entry key="project.open.time.10" value="4" />
+          <entry key="project.closed" value="8" />
+          <entry key="project.open.time.10" value="5" />
           <entry key="project.open.time.11" value="2" />
           <entry key="project.open.time.13" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.7" value="1" />
           <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="11" />
+          <entry key="project.open.time.9" value="1" />
+          <entry key="project.opened" value="13" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
+          <entry key="js_bridge_template" value="1" />
           <entry key="py" value="17" />
           <entry key="spedn" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="PLAIN_TEXT" value="2" />
+          <entry key="PLAIN_TEXT" value="3" />
           <entry key="Python" value="17" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="1299" />
-          <entry key="py" value="19273" />
+          <entry key="Python Console" value="1334" />
+          <entry key="js_bridge_template" value="1" />
+          <entry key="py" value="19862" />
           <entry key="spedn" value="70" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="70" />
-          <entry key="Python" value="20572" />
+          <entry key="PLAIN_TEXT" value="71" />
+          <entry key="Python" value="21196" />
         </counts>
       </usages-collector>
     </session>
@@ -68,11 +70,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/covenant_generator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="175">
+            <state relative-caret-position="7220">
               <caret line="382" column="29" selection-start-line="382" selection-start-column="29" selection-end-line="382" selection-end-column="29" />
               <folding>
                 <element signature="e#662#671#0" expanded="true" />
-                <element signature="e#4135#4386#0" />
                 <marker date="1598627375464" expanded="true" signature="9908:9913" ph="..." />
               </folding>
             </state>
@@ -82,13 +83,13 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cli.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="215">
-              <caret line="47" column="36" selection-start-line="47" selection-start-column="36" selection-end-line="47" selection-end-column="36" />
+            <state relative-caret-position="228">
+              <caret line="84" lean-forward="true" selection-start-line="84" selection-end-line="84" />
               <folding>
                 <element signature="e#64#96#0" expanded="true" />
-                <element signature="e#11205#12728#1" />
-                <marker date="1598628750217" expanded="true" signature="1249:1363" ph="..." />
-                <marker date="1598628750217" expanded="true" signature="1442:1454" ph="..." />
+                <marker date="1598716817671" expanded="true" signature="249:1323" ph="..." />
+                <marker date="1598716817671" expanded="true" signature="2337:2451" ph="..." />
+                <marker date="1598716817671" expanded="true" signature="2530:2542" ph="..." />
               </folding>
             </state>
           </provider>
@@ -97,13 +98,21 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js_bridge.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="399">
-              <caret line="21" column="7" lean-forward="true" selection-start-line="21" selection-start-column="7" selection-end-line="21" selection-end-column="7" />
+            <state relative-caret-position="323">
+              <caret line="68" column="35" lean-forward="true" selection-start-line="68" selection-start-column="8" selection-end-line="68" selection-end-column="35" />
               <folding>
-                <marker date="1598626464734" expanded="true" signature="449:1650" ph="..." />
-                <marker date="1598626464734" expanded="true" signature="678:687" ph="..." />
-                <marker date="1598626464734" expanded="true" signature="888:1475" ph="..." />
+                <marker date="1598694678707" expanded="true" signature="1420:1681" ph="..." />
+                <marker date="1598694678707" expanded="true" signature="1696:1705" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js_bridge_template">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="285">
+              <caret line="15" column="28" lean-forward="true" selection-start-line="15" selection-start-column="28" selection-end-line="15" selection-end-column="28" />
             </state>
           </provider>
         </entry>
@@ -152,6 +161,7 @@
         <option value="$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/LastWill.spedn" />
         <option value="$PROJECT_DIR$/covenant_generator.py" />
         <option value="$PROJECT_DIR$/js_bridge.py" />
+        <option value="$PROJECT_DIR$/js_bridge_template" />
         <option value="$PROJECT_DIR$/cli.py" />
       </list>
     </option>
@@ -258,6 +268,9 @@
       <module name="BCH_covenants" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="/usr/bin/python3.6" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
@@ -296,7 +309,7 @@
     <frame x="8" y="31" width="1920" height="1017" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49837133" visible="true" weight="0.18137783" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49837133" visible="true" weight="0.18675996" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.50162864" side_tool="true" weight="0.2497309" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -311,7 +324,7 @@
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Terminal" order="11" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="12" visible="true" weight="0.38127854" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="12" visible="true" weight="0.42922375" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -326,65 +339,20 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="9" selection-start-column="9" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/notification_service.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="18" column="40" lean-forward="true" selection-start-line="18" selection-start-column="40" selection-end-line="18" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/util.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/LastWill.spedn">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="18" column="8" selection-start-line="18" selection-start-column="8" selection-end-line="18" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/qt.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1824">
-          <caret line="101" column="28" selection-start-line="101" selection-start-column="24" selection-end-line="101" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/ui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2147">
-          <caret line="133" column="26" selection-start-line="133" selection-start-column="26" selection-end-line="133" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/contract_finder.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1254">
-          <caret line="70" column="12" selection-start-line="70" selection-start-column="12" selection-end-line="70" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/last_will_contract.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="174">
-          <caret line="112" column="28" lean-forward="true" selection-start-line="112" selection-start-column="28" selection-end-line="112" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/notification_service.py" />
+    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/util.py" />
+    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/LastWill.spedn" />
+    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/qt.py" />
+    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/ui.py" />
+    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/contract_finder.py" />
+    <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/last_will_contract.py" />
     <entry file="file://$PROJECT_DIR$/covenant_generator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
+        <state relative-caret-position="7220">
           <caret line="382" column="29" selection-start-line="382" selection-start-column="29" selection-end-line="382" selection-end-column="29" />
           <folding>
             <element signature="e#662#671#0" expanded="true" />
-            <element signature="e#4135#4386#0" />
             <marker date="1598627375464" expanded="true" signature="9908:9913" ph="..." />
           </folding>
         </state>
@@ -392,25 +360,31 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js_bridge.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="21" column="7" lean-forward="true" selection-start-line="21" selection-start-column="7" selection-end-line="21" selection-end-column="7" />
+        <state relative-caret-position="323">
+          <caret line="68" column="35" lean-forward="true" selection-start-line="68" selection-start-column="8" selection-end-line="68" selection-end-column="35" />
           <folding>
-            <marker date="1598626464734" expanded="true" signature="449:1650" ph="..." />
-            <marker date="1598626464734" expanded="true" signature="678:687" ph="..." />
-            <marker date="1598626464734" expanded="true" signature="888:1475" ph="..." />
+            <marker date="1598694678707" expanded="true" signature="1420:1681" ph="..." />
+            <marker date="1598694678707" expanded="true" signature="1696:1705" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js_bridge_template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="15" column="28" lean-forward="true" selection-start-line="15" selection-start-column="28" selection-end-line="15" selection-end-column="28" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cli.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="215">
-          <caret line="47" column="36" selection-start-line="47" selection-start-column="36" selection-end-line="47" selection-end-column="36" />
+        <state relative-caret-position="228">
+          <caret line="84" lean-forward="true" selection-start-line="84" selection-end-line="84" />
           <folding>
             <element signature="e#64#96#0" expanded="true" />
-            <element signature="e#11205#12728#1" />
-            <marker date="1598628750217" expanded="true" signature="1249:1363" ph="..." />
-            <marker date="1598628750217" expanded="true" signature="1442:1454" ph="..." />
+            <marker date="1598716817671" expanded="true" signature="249:1323" ph="..." />
+            <marker date="1598716817671" expanded="true" signature="2337:2451" ph="..." />
+            <marker date="1598716817671" expanded="true" signature="2530:2542" ph="..." />
           </folding>
         </state>
       </provider>

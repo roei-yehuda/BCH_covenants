@@ -1,0 +1,177 @@
+/*
+This file is a template...
+*/
+
+import {BITBOX} from "bitbox-sdk";
+import { Contract, SignatureTemplate } from 'cashscript';
+
+// general consts
+const NETWORK = ###NETWORK###;
+const MAINNET_API = ###MAINNET_API###;
+const TESTNET_API = ###TESTNET_API###;
+
+// wallet consts
+const w_json_f = ###W_JSON###;
+const mnemonic = ###MNEMONIC###;
+const child_i = ###CHILD###;
+
+// contract consts
+const cash_f = ###CASH_F###;
+const artifact_f = ###ARTIFACT_F###;
+const con_info_json_f = ###C_JSON###;
+const do_compile = ###DO_COMPILE###;
+
+const fs = require('fs');
+const outObj = new Object();
+
+
+// @ts-ignore
+async function create_wallet() {
+	/*
+	Creates an HDnode and saves its info into w_json_f.
+	*/
+
+	if (NETWORK === 'mainnet') {
+		const bitbox = new BITBOX();
+	}
+	else {
+		const bitbox = new BITBOX({restURL: TESTNET_API});
+	}
+
+	if (mnemonic === '') {
+		mnemonic = bitbox.Mnemonic.generate();
+	}
+
+	const rootSeed = bitbox.Mnemonic.toSeed(mnemonic);
+	const hdNode = bitbox.HDNode.fromSeed(rootSeed, NETWORK);	// wallet
+
+	// Create key pair and public key
+	const childNode = bitbox.HDNode.derive(hdNode, child_i);
+	const childKeyPair = bitbox.HDNode.toKeyPair(childNode);	// alice
+	const childPK = bitbox.ECPair.toPublicKey(childKeyPair);	// alicePk
+
+	// Write out the basic information into a json file
+	const outObj = {
+		mnemonic: mnemonic,
+		hdNode: hdNode,
+		childNode_i: child_i,
+		childNode: childNode,
+		childKeyPair: childKeyPair,
+		childPK: childPK,
+		cashAddress: bitbox.HDNode.toCashAddress(childNode),
+	};
+	fs.writeFile(w_json_f, JSON.stringify(outObj, null, 2), function (err) {
+      if (err) return console.error(err)
+      console.log(w_json_f + ' written successfully.');
+    });
+
+}
+
+// @ts-ignore
+async function init_contract() {
+	/*
+	This function creates and instanciates a new contract, and then exports it (i.e. updating the instance info in the artifact json)
+	so it can later be retrieved by the contract.deployed() method.
+	*/
+
+	// there are two ways to create a Contract object - either compile the source code, or import it from an artifact file (no need for export() to have been called before)
+	if (do_compile) {
+		const con = Contract.compile(cash_f, NETWORK);
+	}
+	else {
+		const con = Contract.import(artifact_f, NETWORK);
+	}
+
+	const instance = con.new(###CONSTRUCTOR_ARGS###);
+	const artifact = con.export();
+
+	// Write out the basic information into a json file
+	const outObj = {
+		address: instance.address,
+		constructor_args: '###CONSTRUCTOR_ARGS###',
+	};
+	fs.writeFile(con_info_json_f, JSON.stringify(outObj, null, 2), function (err) {
+      if (err) return console.error(err)
+      console.log(con_info_json_f + ' written successfully.')
+    });
+
+}
+
+// @ts-ignore
+async function load_contract_info(){
+	/*
+	Load the info found at con_info_json_f, which is basically the contract's address (and, less important, its constructor variables line as string).
+	*/
+
+	try {
+	  var conInfo = require(con_info_json_f);
+	} catch (err) {
+		try {
+			var conInfo = require('.\\' + con_info_json_f);
+		} catch (err) {
+			console.log('Could not open ' +  con_info_json_f);
+			process.exit(0);
+		}
+	}
+	console.log('loaded ' + con_info_json_f);
+	return conInfo;
+}
+
+// @ts-ignore
+async function load_deployed_contract(){
+	/*
+	Creates a contract object from an existing deployed contract instance.
+	This function assumes: the contract found at con_info_json_f was created and instanciated in the past, and exported as well.
+	This function uses: artifact_f, con_info_json_f
+	return: instance (Contract class)
+	*/
+	// create contract:
+	const con = Contract.import(artifact_f, NETWORK);
+
+	// load deployed instance:
+	const conInfo = load_contract_info();
+	const instance = con.deployed(conInfo.address);
+
+	return instance;
+}
+
+// @ts-ignore
+async function print_contract_info() {
+	// load instance:
+	const instance = load_deployed_contract();
+	console.log('contract instance info:');
+	console.log('address: ' + instance.address);
+	console.log('opcount: ' + instance.opcount);
+	console.log('bytesize: ' + instance.bytesize);
+	const contractBalance = await instance.getBalance();
+	console.log('balance: ' + contractBalance);
+	console.log('UTXOs:');
+	const utxos = await instance.getUtxos();
+	console.log(utxos);
+}
+
+// @ts-ignore
+async function use_contract() {
+	/*
+	Use a contract by calling one of its functions.
+	*/
+
+	// creator of tx:
+	const walletInfo = await load_wallet_info();
+	const childKeyPair = walletInfo.childKeyPair;	// alice
+	const childPK = walletInfo.childPK;	// alicePk
+
+	// contract instance:
+	const instance = load_deployed_contract();
+
+	// build and send tx:
+	const txDetails = await instance.functions.###TX_FUNC###;
+
+	console.log('Tx details:');
+	console.log(txDetails);
+
+}
+
+
+
+###MAIN###
