@@ -6,19 +6,19 @@ import {BITBOX} from "bitbox-sdk";
 import { Contract, SignatureTemplate } from 'cashscript';
 
 // general consts
-const NETWORK = ###NETWORK###;
-const MAINNET_API = ###MAINNET_API###;
-const TESTNET_API = ###TESTNET_API###;
+const NETWORK = '###NETWORK###';
+const MAINNET_API = '###MAINNET_API###';
+const TESTNET_API = '###TESTNET_API###';
 
 // wallet consts
-const w_json_f = ###W_JSON###;
-const mnemonic = ###MNEMONIC###;
-const child_i = ###CHILD###;
+const w_json_f = '###W_JSON###';
+const mnemonic = '###MNEMONIC###';
+const child_i = '###CHILD_I###';
 
 // contract consts
-const cash_f = ###CASH_F###;
-const artifact_f = ###ARTIFACT_F###;
-const con_info_json_f = ###C_JSON###;
+const cash_f = '###CASH_F###';
+const artifact_f = '###ARTIFACT_F###';
+const con_info_json_f = '###C_JSON###';
 const do_compile = ###DO_COMPILE###;
 
 const fs = require('fs');
