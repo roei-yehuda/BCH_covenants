@@ -427,31 +427,31 @@ class cov_gen():
         with open(cash_file_path, "w") as f:
             print(self.get_script(), file=f)
 
-    def compile_script(self, cash_file_path=None, json_file_path=None):
+    def compile_script(self, cash_file_path=None, artifact_json_file_path=None):
         """
         Use cashScript compiler, cashc, to compile the (current) final script, and return the byte_code.
         :param cash_file_path: (optional) string. if None, no cashScript file (.cash) is saved to file.
-        :param json_file_path: (optional) string. if None, no compiled artifact (.json) is saved to file.
+        :param artifact_json_file_path: (optional) string. if None, no compiled artifact (.json) is saved to file.
         :return: string
         """
 
         delete_cash_file_later = cash_file_path is None
-        delete_json_file_later = json_file_path is None
+        delete_json_file_later = artifact_json_file_path is None
         cash_file_path = cash_file_path if cash_file_path is not None else 'to_be_deleted.cash'
-        json_file_path = json_file_path if json_file_path is not None else 'to_be_deleted.json'
+        artifact_json_file_path = artifact_json_file_path if artifact_json_file_path is not None else 'to_be_deleted.json'
 
         self.save_script(cash_file_path)
-        os.system("cashc " + cash_file_path + " -o " + json_file_path)
+        os.system("cashc " + cash_file_path + " -o " + artifact_json_file_path)
 
-        with open(json_file_path) as f:
+        with open(artifact_json_file_path) as f:
             data = json.load(f)
         byte_code = data['bytecode']
 
         if delete_cash_file_later and os.path.exists(cash_file_path):
             os.remove(cash_file_path)
 
-        if delete_json_file_later and os.path.exists(json_file_path):
-            os.remove(json_file_path)
+        if delete_json_file_later and os.path.exists(artifact_json_file_path):
+            os.remove(artifact_json_file_path)
 
         return byte_code
 

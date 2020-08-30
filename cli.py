@@ -14,7 +14,6 @@ IN = 'yellow'
 HIGHLIGHT = 'blue'
 
 
-
 class js_bridge():
 
     def __init__(self):
@@ -49,6 +48,7 @@ class js_bridge():
             print(js_code, file=f)
 
         # os.system("ts-node " + self.js_temp_code_path)
+
 
 
 class cov_gen_CLI():
