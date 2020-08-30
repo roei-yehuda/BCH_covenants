@@ -231,7 +231,8 @@ class cov_gen_CLI():
         """ restrict operators """
         r_d = copy.deepcopy(cov_fn.restrict_operators_kwargs_d)
         r_d['n'] = self.parse_input(desc_line='number of desired operators', tp=int, default=1,
-                                    i_msg='Operators are the number of users that you would like to give could key access')
+                                    i_msg='Operators are the users that can call this function,\n'
+                                          'they will be identified by their public key and their signature')
         return r_d
 
     def fn_rs_recipients(self):
@@ -362,6 +363,19 @@ class cov_gen_CLI():
     def generate_cov(self):
         cg = cov_gen(**self.cov_init_args)
         cg.build_from_fn_list(self.cov_funcs_list)
+        if self._y_n_question('your contract is ready, would you like to compile it?') == 'y':
+
+            def get_file_name(file_type: str, language_name: str):
+                file_name = self.parse_input(desc_line='enter a file name and path for the {} file, no spaces'.format(file_type),
+                                             tp=str, default=None,
+                                             i_msg='give a name to the file that will be saving your contract in {} format'.format(language_name))
+                return file_name[:file_name.find('.')] + '.{}'.format(file_type)
+
+            cash_file_path = get_file_name('cash', 'cashScript')
+            artifact_json_file_path = get_file_name('json', 'json')
+            cg.compile_script(cash_file_path, artifact_json_file_path)
+
+        self.print('this is your contract:\n', REG)
         print(cg.get_script())
         return cg
 
