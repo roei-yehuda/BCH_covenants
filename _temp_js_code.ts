@@ -6,20 +6,20 @@ import {BITBOX} from "bitbox-sdk";
 import { CashCompiler, Contract, SignatureTemplate } from 'cashscript';
 
 // general consts
-let NETWORK = '###NETWORK###';
-const MAINNET_API = '###MAINNET_API###';
-const TESTNET_API = '###TESTNET_API###';
+let NETWORK = 'testnet';
+const MAINNET_API = 'https://free-main.fullstack.cash/v3/';
+const TESTNET_API = 'https://free-test.fullstack.cash/v3/';
 
 // wallet consts
-const w_json_f = '###W_JSON###';
-let mnemonic = '###MNEMONIC###';
-const child_i = ###CHILD_I###;
+const w_json_f = 'wallet.json';
+let mnemonic = '';
+const child_i = 0;
 
 // contract consts
-const cash_f = '###CASH_F###';
-const artifact_f = '###ARTIFACT_F###';
-const con_info_json_f = '###C_JSON###';
-const do_compile = ###DO_COMPILE###;
+const cash_f = 'cov.cash';
+const artifact_f = 'cov.json';
+const con_info_json_f = '_cov_info.json';
+const do_compile = true;
 
 
 const fs = require('fs');
@@ -99,21 +99,21 @@ async function init_contract() {
 	}
 
 	// provider
-	const provider = ###NET_PROVIDER###;
+	const provider = new BitboxNetworkProvider(NETWORK, bitbox);
 
 	// new contract
-	if ('###CONSTRUCTOR_ARGS###' === ''){
+	if ('' === ''){
 		// no constructor arguments are given, so try and get them from con_info_json_f
 		const conInfo = load_contract_info();
 		const con = new Contract(artifact, conInfo.constructor_args, provider);
 	} else {
 		// create a new contract
-		const con = new Contract(artifact, [###CONSTRUCTOR_ARGS###], provider);
+		const con = new Contract(artifact, [], provider);
 		// Write out the basic information into con_info_json_f
 		const outObj = {
 			address: con.address,
-			constructor_args: [###CONSTRUCTOR_ARGS###],
-			network_provider_str: '###NET_PROVIDER###'
+			constructor_args: [],
+			network_provider_str: 'new BitboxNetworkProvider(NETWORK, bitbox)'
 		};
 		fs.writeFile(con_info_json_f, JSON.stringify(outObj, null, 2), function (err) {
 		  if (err) return console.error(err)
@@ -177,7 +177,7 @@ async function use_contract() {
 	const con = init_contract();
 
 	// build and send tx:
-	const txDetails = ###TX_FUNC###;
+	const txDetails = '';
 
 	console.log('Tx details:');
 	console.log(txDetails);
@@ -186,4 +186,5 @@ async function use_contract() {
 
 
 
-###MAIN###
+console.log('Wassup??');
+

@@ -31,7 +31,7 @@ class js_bridge():
             'DO_COMPILE': 'true',
             'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',     # new ElectrumProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
             'CONSTRUCTOR_ARGS': '',
-            'TX_FUNC': '',  # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
+            'TX_FUNC': "''",  # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
             'MAIN': "console.log('Wassup??');"
         }
         self.js_template_path = 'js_bridge_template'
@@ -331,7 +331,7 @@ class cov_gen_CLI():
 
 
 if __name__ == '__main__':
-    j = js_bridge()
-    j.run()
+    # j = js_bridge()
+    # j.run()
 
-    # cov_gen_CLI()
+    cov_gen_CLI()
