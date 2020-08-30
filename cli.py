@@ -1,17 +1,22 @@
 # this is the command line interface for our covenant generator
 from covenant_generator import *
-from termcolor import colored
 import copy
 import os
 import sys
 import re
+
+from termcolor import colored
+import platform
+if platform.platform().startswith('Windows'):
+    import colorama
+    colorama.init()
 
 
 # print colors:
 REG = 'white'
 ERR = 'red'
 IN = 'yellow'
-HIGHLIGHT = 'blue'
+HIGHLIGHT = 'cyan'
 
 
 class js_bridge():
@@ -28,7 +33,7 @@ class js_bridge():
             'ARTIFACT_F': 'cov.json',
             'C_JSON': '_cov_info.json',
             'DO_COMPILE': 'true',
-            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',     # new ElectrumProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
+            'NET_PROVIDER': 'new ElectrumNetworkProvider(NETWORK)',     # new ElectrumProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
             'CONSTRUCTOR_ARGS': '',
             'TX_FUNC': "''",  # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
             'MAIN': "console.log('Wassup??');"
@@ -47,7 +52,7 @@ class js_bridge():
         with open(self.js_temp_code_path, "w") as f:
             print(js_code, file=f)
 
-        # os.system("ts-node " + self.js_temp_code_path)
+        os.system("ts-node " + self.js_temp_code_path)
 
 
 
@@ -80,9 +85,9 @@ class cov_gen_CLI():
                     "- 'min' vs 'max':\n" \
                     "  If min is defined, then the funds must be pulled after the TIME specified.\n" \
                     "  If max is defined, the funds must be pulled before the TIME specified."
-    rs_i_msg = "Operators restriction:\n" + utils().indent(rs_operators_i_msg) + "" \
-                + "Recipients restriction:\n" + utils().indent(rs_recipients_i_msg) + "" \
-                + "Amount restriction:\n" + utils().indent(rs_amount_i_msg) + "" \
+    rs_i_msg = "Operators restriction:\n" + utils().indent(rs_operators_i_msg) + "\n" \
+                + "Recipients restriction:\n" + utils().indent(rs_recipients_i_msg) + "\n" \
+                + "Amount restriction:\n" + utils().indent(rs_amount_i_msg) + "\n" \
                 + "Time restriction:\n" + utils().indent(rs_time_i_msg)
     add_fn_i_msg = "A contract consists of functions. Each function is composed of restrictions,\n" \
                    " i.e. requirements, which must all be met in order to access the funds stored\n" \
@@ -163,10 +168,7 @@ class cov_gen_CLI():
                    '\tEach function includes at least one restriction (requirement).\n' +
                    '\tIn order to use a contract (e.g. spend money from it), one interacts\n' +
                    '\twith one of its functions and has to meet all of its restrictions.')
-        add_fn_i_msg = "A contract consists of functions. Each function is composed of restrictions,\n" \
-                       " i.e. requirements, which must all be met in order to access the funds stored\n" \
-                       "in the contract."
-        while self._y_n_question('would you like to add another function?', i_msg=self.add_fn_i_msg) == 'y':
+        while self._y_n_question('would you like to add a new function?', i_msg=self.add_fn_i_msg) == 'y':
             self.add_fn()
         self.print('\n', REG)
         self.generate_cov()
@@ -240,11 +242,11 @@ class cov_gen_CLI():
                     return my_input_in_tp
                 else:
                     self.print('Oops! wrong input, your options are {}:'.format(str(choices)), ERR)
-                    self.parse_input(desc_line, tp, default, choices, i_msg, end, show_choice)
+                    return self.parse_input(desc_line, tp, default, choices, i_msg, end, show_choice)
             return my_input_in_tp
         except ValueError:
             self.print('Oops! {} is not of type {}, try again:'.format(str(my_input), str(tp)), ERR)
-            self.parse_input(desc_line, tp, default, choices, i_msg, end, show_choice)
+            return self.parse_input(desc_line, tp, default, choices, i_msg, end, show_choice)
 
     def _h(self):
         """ help information global """
@@ -288,8 +290,8 @@ class cov_gen_CLI():
         # todo: have roei check:
         r_d['require_recipient_sig'] = 'y' == self._y_n_question('would you like to require a signature from the recipient(s)?',
                                                                  i_msg=self.rs_recipients_i_msg)
-        r_d['include_all'] = self.parse_input(desc_line="Would you like to allow any of the recipients on the tx's output,\nor demand all of them?",
-                                              tp=int, default=['any'], choices=['any', 'all'],
+        r_d['include_all'] = 'all' == self.parse_input(desc_line="Would you like the tx's output to include any of the recipients or all of them?",
+                                              tp=str, default='any', choices=['any', 'all'],
                                               i_msg=self.rs_recipients_i_msg)
 
         return r_d
@@ -379,7 +381,7 @@ class cov_gen_CLI():
             fn_restrictions.append((r, r_args_d))
 
         # add restrictions in a while loop
-        while self._y_n_question('would you like to add another restriction?', i_msg=self.add_rs_i_msg) == 'y':
+        while self._y_n_question('would you like to add a new restriction?', i_msg=self.add_rs_i_msg) == 'y':
             add_restriction()
 
         self.cov_funcs_list.append((fn_name, fn_desc, fn_restrictions))
@@ -397,7 +399,7 @@ class cov_gen_CLI():
 
 
 if __name__ == '__main__':
-    # j = js_bridge()
-    # j.run()
+    #j = js_bridge()
+    #j.run()
 
     cov_gen_CLI()

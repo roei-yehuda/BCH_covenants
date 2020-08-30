@@ -3,7 +3,13 @@ This file is a template...
 */
 
 import {BITBOX} from "bitbox-sdk";
-import { CashCompiler, Contract, SignatureTemplate } from 'cashscript';
+//import { CashCompiler, Contract, SignatureTemplate } from 'cashscript';
+const {
+  CashCompiler,
+  ElectrumNetworkProvider,
+  Contract,
+  SignatureTemplate,
+} = require('cashscript');
 
 // general consts
 let NETWORK = '###NETWORK###';
@@ -32,11 +38,9 @@ async function create_wallet() {
 	Creates an HDnode and saves its info into w_json_f.
 	*/
 
-	if (NETWORK === 'mainnet') {
-		const bitbox = new BITBOX();
-	}
-	else {
-		const bitbox = new BITBOX({restURL: TESTNET_API});
+	let bitbox = new BITBOX();
+	if (NETWORK === 'testnet') {
+		bitbox = new BITBOX({restURL: TESTNET_API});
 	}
 
 	if (mnemonic === '') {
@@ -74,14 +78,14 @@ async function init_contract() {
 	This function creates and returns a new contract
 	*/
 
-	if (NETWORK === 'mainnet') {
-		const bitbox = new BITBOX();
-	}
-	else {
-		const bitbox = new BITBOX({restURL: TESTNET_API});
+	let bitbox = new BITBOX();
+	if (NETWORK === 'testnet') {
+		bitbox = new BITBOX({restURL: TESTNET_API});
 	}
 
 	// artifact
+	const artifact = CashCompiler.compileFile(cash_f);
+	/*
 	if (do_compile) {
 		const artifact = CashCompiler.compileFile(cash_f);
 	}
@@ -97,29 +101,23 @@ async function init_contract() {
 			}
 		}
 	}
+	*/
 
 	// provider
 	const provider = ###NET_PROVIDER###;
 
-	// new contract
-	if ('###CONSTRUCTOR_ARGS###' === ''){
-		// no constructor arguments are given, so try and get them from con_info_json_f
-		const conInfo = load_contract_info();
-		const con = new Contract(artifact, conInfo.constructor_args, provider);
-	} else {
-		// create a new contract
-		const con = new Contract(artifact, [###CONSTRUCTOR_ARGS###], provider);
-		// Write out the basic information into con_info_json_f
-		const outObj = {
-			address: con.address,
-			constructor_args: [###CONSTRUCTOR_ARGS###],
-			network_provider_str: '###NET_PROVIDER###'
-		};
-		fs.writeFile(con_info_json_f, JSON.stringify(outObj, null, 2), function (err) {
-		  if (err) return console.error(err)
-		  console.log(con_info_json_f + ' written successfully.')
-		});
-	}
+	// create a new contract
+	const con = new Contract(artifact, [###CONSTRUCTOR_ARGS###], provider);
+	// Write out the basic information into con_info_json_f
+	const outObj = {
+		address: con.address,
+		constructor_args: [###CONSTRUCTOR_ARGS###],
+		network_provider_str: '###NET_PROVIDER###'
+	};
+	fs.writeFile(con_info_json_f, JSON.stringify(outObj, null, 2), function (err) {
+	  if (err) return console.error(err)
+	  console.log(con_info_json_f + ' written successfully.')
+	});
 
 	return con;
 
@@ -146,11 +144,34 @@ async function load_contract_info(){
 	return conInfo;
 }
 
+// @ts-ignore
+async function load_wallet_info(){
+	/*
+	Load the info found at w_json_f
+	*/
+
+	try {
+	  var conInfo = require(w_json_f);
+	} catch (err) {
+		try {
+			var conInfo = require('.\\' + w_json_f);
+		} catch (err) {
+			console.log('Could not open ' +  w_json_f);
+			process.exit(0);
+		}
+	}
+	console.log('loaded ' + w_json_f);
+	return conInfo;
+}
 
 // @ts-ignore
 async function print_contract_info() {
 
-	const con = init_contract();
+	// const con = init_contract();
+	const artifact = CashCompiler.compileFile(cash_f);
+	const provider = ###NET_PROVIDER###;
+	const con = new Contract(artifact, [###CONSTRUCTOR_ARGS###], provider);
+
 	console.log('contract info:');
 	console.log('address: ' + con.address);
 	console.log('opcount: ' + con.opcount);
@@ -174,7 +195,10 @@ async function use_contract() {
 	const childPK = walletInfo.childPK;	// alicePk
 
 	// contract contract:
-	const con = init_contract();
+	// const con = init_contract();
+	const artifact = CashCompiler.compileFile(cash_f);
+	const provider = ###NET_PROVIDER###;
+	const con = new Contract(artifact, [###CONSTRUCTOR_ARGS###], provider);
 
 	// build and send tx:
 	const txDetails = ###TX_FUNC###;
