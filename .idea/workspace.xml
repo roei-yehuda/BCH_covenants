@@ -4,7 +4,6 @@
     <list default="true" id="6c103c48-6bb0-4c29-9a45-9629b69255c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js_bridge_template" beforeDir="false" afterPath="$PROJECT_DIR$/js_bridge_template" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -52,7 +51,7 @@
         <counts>
           <entry key="Python Console" value="1406" />
           <entry key="js_bridge_template" value="7" />
-          <entry key="py" value="24585" />
+          <entry key="py" value="26355" />
           <entry key="spedn" value="70" />
           <entry key="ts" value="12" />
         </counts>
@@ -60,7 +59,7 @@
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="77" />
-          <entry key="Python" value="25991" />
+          <entry key="Python" value="27761" />
           <entry key="TypeScript" value="12" />
         </counts>
       </usages-collector>
@@ -79,7 +78,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/covenant_generator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
+            <state relative-caret-position="-3819">
               <folding>
                 <element signature="e#662#671#0" expanded="true" />
                 <marker date="1598791084057" expanded="true" signature="9908:9913" ph="..." />
@@ -88,25 +87,34 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cli.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="380">
-              <caret line="257" column="32" lean-forward="true" selection-start-line="257" selection-start-column="32" selection-end-line="257" selection-end-column="32" />
+            <state relative-caret-position="383">
+              <caret line="216" column="6" lean-forward="true" selection-start-line="216" selection-start-column="6" selection-end-line="216" selection-end-column="6" />
               <folding>
                 <element signature="e#64#96#0" expanded="true" />
-                <marker date="1598804066209" expanded="true" signature="1689:1696" ph="..." />
-                <marker date="1598804066209" expanded="true" signature="1918:2050" ph="..." />
+                <element signature="e#5466#7971#0" />
+                <element signature="e#8216#10045#0" />
+                <element signature="e#10073#10283#0" />
+                <element signature="e#10314#10358#0" />
+                <element signature="e#10803#11132#0" />
+                <element signature="e#11174#12668#0" />
+                <element signature="e#14028#15045#0" />
+                <element signature="e#13806#16186#0" />
+                <element signature="e#18029#20127#0" />
+                <marker date="1598810568953" expanded="true" signature="1689:1696" ph="..." />
+                <marker date="1598810568953" expanded="true" signature="1918:2050" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js_bridge_template">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="468">
-              <caret line="185" lean-forward="true" selection-start-line="185" selection-end-line="185" />
+            <state relative-caret-position="240">
+              <caret line="173" lean-forward="true" selection-start-line="173" selection-end-line="173" />
             </state>
           </provider>
         </entry>
@@ -163,8 +171,8 @@
         <option value="$PROJECT_DIR$/js_bridge.py" />
         <option value="$PROJECT_DIR$/_temp_js_code.ts" />
         <option value="$PROJECT_DIR$/covenant_generator.py" />
-        <option value="$PROJECT_DIR$/cli.py" />
         <option value="$PROJECT_DIR$/js_bridge_template" />
+        <option value="$PROJECT_DIR$/cli.py" />
       </list>
     </option>
   </component>
@@ -317,7 +325,7 @@
       <window_info id="Favorites" order="2" sideWeight="0.50162864" side_tool="true" weight="0.2497309" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32990867" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.38698632" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.16780822" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.49657536" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -368,9 +376,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/js_bridge_template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="173" lean-forward="true" selection-start-line="173" selection-end-line="173" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/covenant_generator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="-3819">
           <folding>
             <element signature="e#662#671#0" expanded="true" />
             <marker date="1598791084057" expanded="true" signature="9908:9913" ph="..." />
@@ -380,20 +395,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/cli.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="257" column="32" lean-forward="true" selection-start-line="257" selection-start-column="32" selection-end-line="257" selection-end-column="32" />
+        <state relative-caret-position="383">
+          <caret line="216" column="6" lean-forward="true" selection-start-line="216" selection-start-column="6" selection-end-line="216" selection-end-column="6" />
           <folding>
             <element signature="e#64#96#0" expanded="true" />
-            <marker date="1598804066209" expanded="true" signature="1689:1696" ph="..." />
-            <marker date="1598804066209" expanded="true" signature="1918:2050" ph="..." />
+            <element signature="e#5466#7971#0" />
+            <element signature="e#8216#10045#0" />
+            <element signature="e#10073#10283#0" />
+            <element signature="e#10314#10358#0" />
+            <element signature="e#10803#11132#0" />
+            <element signature="e#11174#12668#0" />
+            <element signature="e#14028#15045#0" />
+            <element signature="e#13806#16186#0" />
+            <element signature="e#18029#20127#0" />
+            <marker date="1598810568953" expanded="true" signature="1689:1696" ph="..." />
+            <marker date="1598810568953" expanded="true" signature="1918:2050" ph="..." />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js_bridge_template">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="468">
-          <caret line="185" lean-forward="true" selection-start-line="185" selection-end-line="185" />
         </state>
       </provider>
     </entry>

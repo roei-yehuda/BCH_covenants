@@ -224,15 +224,17 @@ class cov_gen_CLI():
             self.run()
         return
 
-    def _y_n_question(self, question: str):
+    def _y_n_question(self, question: str, i_msg=None):
+        if i_msg is None:
+            i_msg = '{}? type y or n and then enter)'.format(question)
         return self.parse_input(desc_line=question, tp=str, default=None, choices=['y', 'n'],
-                                i_msg='{}? type y or n and then enter)'.format(question))
+                                i_msg=i_msg)
 
     rs_operators_i_msg = "Operator of a function is someone who is allowed to use (call) it.\n" \
-                         "Their public key and signature will be varified upon calling the function.\n" \
-                         "Note that if a function is composed solely of an operators restriction, then\n" \
-                         "these operators may create a transaction that calls this function and spend the\n" \
-                         "contract's funds freely."
+                         "Their public key and signature will be verified upon calling the function.\n" \
+                         "- Note that if a function is composed solely of an operators restriction, then\n" \
+                         "  these operators may create a transaction that calls this function and spend the\n" \
+                         "  contract's funds freely."
     def fn_rs_operators(self):
         """ restrict operators """
         r_d = copy.deepcopy(cov_fn.restrict_operators_kwargs_d)
@@ -242,62 +244,72 @@ class cov_gen_CLI():
 
     rs_recipients_i_msg = "Recipient of a function is someone that appears on the transaction's output.\n" \
                           "Recipients may be public keys (P2PKH) or contract addresses (P2SH).\n" \
-                          "Note that if a function is composed solely of a recipients restriction, without\n" \
-                          "requiring their signatures as well, then anyone can create any transaction given\n" \
-                          "that the output is (either one of, or all of) the pre-defined recipients."
+                          "- If the recipients are required for a signature as well (relevant for PKH recipients),\n" \
+                          "  this means they have to be of the signers of the transaction, i.e. only one of the \n" \
+                          "  recipients can call this function.\n" \
+                          "- Any or all: It is possible to allow any (one) of the recipients to get the funds, or \n" \
+                          "  demand that all of them get an equal share every time this function is called.\n" \
+                          "- Note that if a function is composed solely of a recipients restriction, and\n" \
+                          "  without requiring their signatures, then anyone can create any transaction given\n" \
+                          "  that the output is (either one of, or all of) the pre-defined recipients."
     def fn_rs_recipients(self):
         """ restrict recipients """
         r_d = copy.deepcopy(cov_fn.restrict_recipients_kwargs_d)
 
-        r_d['n_PKH'] = self.parse_input(desc_line='number of desired recipients (P2PKH)', tp=int, default=1,
+        r_d['n_PKH'] = self.parse_input(desc_line='number of desired P2PKH recipients (P2PKH)', tp=int, default=1,
                                         i_msg=self.rs_recipients_i_msg)
 
-        r_d['n_SH'] = self.parse_input(desc_line='number of desired contract recipients (P2SH)', tp=int, default=0,
+        r_d['n_SH'] = self.parse_input(desc_line='number of desired P2SH recipients (P2SH)', tp=int, default=0,
                                        i_msg=self.rs_recipients_i_msg)
 
         # todo: have roei check:
-        r_d['require_recipient_sig'] = self._y_n_question('would you like to require a signature from the recipient?') == 'y'
-        include_all_tx = "would you like the funds to be distributed to all?\n" \
-                         "if yes, the transaction must include ALL of the recipients in its output \n" \
-                         "(by order of insertion) and each will have an equal share.\n" \
-                         "If not, the transaction must include ANY ONE of the recipients."
-        self.print(include_all_tx, REG)
-        r_d['include_all'] = self._y_n_question('would you like the funds to be distributed to all?') == 'y'
+        r_d['require_recipient_sig'] = 'y' == self._y_n_question('would you like to require a signature from the recipient(s)?',
+                                                                 i_msg=self.rs_recipients_i_msg)
+        r_d['include_all'] = self.parse_input(desc_line="Would you like to allow any of the recipients on the tx's output,\nor demand all of them?",
+                                              tp=int, default=['any'], choices=['any', 'all'],
+                                              i_msg=self.rs_recipients_i_msg)
 
         return r_d
 
+    rs_amount_i_msg = "The amount of money in the transaction (in satoshis) can be restricted per the \n" \
+                      "transaction, per a recipient i.e. output, or both."
     def fn_rs_amount(self):
         """ restrict the amount that can be pulled in a transaction """
         r_d = copy.deepcopy(cov_fn.restrict_amount_kwargs_d)
-        _tx = "Restricting an amount can restrict the amount per transaction and/or per recipient"
+        _tx = "It is possible to restrict the amount per transaction or per recipient or both"
         self.print(_tx, REG)
 
         def limit_amount_y_n(whom:str):
-            return self._y_n_question('would you like to limit the amount per {}?'.format(whom))
+            return self._y_n_question('would you like to limit the amount per {}?'.format(whom), i_msg=self.rs_amount_i_msg)
 
         if limit_amount_y_n('transaction') == 'y':
-            r_d['max_amount_per_tx'] = self.parse_input(desc_line='amount limit per transaction', tp=int, default=None,
-                                                        i_msg='how much (max) would you like to allow to be drawn per transaction? must be an integer')
+            r_d['max_amount_per_tx'] = self.parse_input(desc_line='amount limit per transaction (positive natural number, in satoshis)', tp=int, default=None,
+                                                        i_msg=self.rs_amount_i_msg)
         if limit_amount_y_n('recipient') == 'y':
-            r_d['max_amount_per_recipient'] = self.parse_input(desc_line='amount limit per recipient', tp=int, default=None,
-                                                               i_msg='how much (max) would you like to allow to be drawn per recipient? must be an integer')
+            r_d['max_amount_per_recipient'] = self.parse_input(desc_line='amount limit per recipient (positive natural number, in satoshis)', tp=int, default=None,
+                                                               i_msg=self.rs_amount_i_msg)
         return r_d
+
+    rs_time_i_msg = "The time of the transaction can be restricted to be within a certain period.\n" \
+                    "- 'time' vs 'age': \n" \
+                    "  It is possible to use either a a relative time restriction (using tx.time), or\n" \
+                    "  an absolute one (using tx.age). Note that due to limitations in the Bitcoin \n" \
+                    "  Script time can only be used with MIN, age can be used with MIN or MAX.\n" \
+                    "- 'time' and 'age' can be either a block number or a time stamp\n" \
+                    "- 'min' vs 'max':\n" \
+                    "  If min is defined, then the funds must be pulled after the TIME specified.\n" \
+                    "  If max is defined, the funds must be pulled before the TIME specified."
 
     def fn_rs_time(self):
         """ create a time window for cancellation """
         r_d = copy.deepcopy(cov_fn.restrict_time_kwargs_d)
-        _tx = "A time restriction defines the time window in which the funds can be pulled.\n" \
-              "You can define a minimum time window - the funds must be pulled after the TIME specified,\n" \
-              "or a maximum time window - the funds must be pulled before the TIME specified,\n" \
-              "or both.\n" \
-              "'time' is an absolute time window, due to limitations in the Bitcoin Script time can only be used with MIN\n" \
-              "'age' is a relative time window and can be used with MIN or MAX\n" \
-              "\t 'time' and 'age' can be either a block number or a time stamp"
+        _tx = "A time restriction defines the time window in which the funds can be pulled, and can\n" \
+              "either be used with a relative or absolute time lock."
         self.print(_tx, REG)
 
         def pick_min_max():
-            _min = self._y_n_question('would you like to add a minimum time limitation?') == 'y'
-            _max = self._y_n_question('would you like to add a maximum time limitation?') == 'y'
+            _min = self._y_n_question('would you like to add a minimum time limitation?', i_msg=self.rs_time_i_msg) == 'y'
+            _max = self._y_n_question('would you like to add a maximum time limitation?', i_msg=self.rs_time_i_msg) == 'y'
             return _min, _max
 
         _min, _max = pick_min_max()
@@ -308,9 +320,9 @@ class cov_gen_CLI():
         def insert_to_rd_min_mex(min_max: str):
             time_stamp = self.parse_input(desc_line='pick a unit of time for {} time limit'.format(min_max), tp=str, default=None,
                                           choices=['seconds', 'minutes', 'hours', 'days', 'weeks'],
-                                          i_msg='write down one of the choices for a {} time reference'.format(min_max))
+                                          i_msg='write down one of the choices for a {} time reference.\nFurther info:\n{}'.format(min_max, self.rs_time_i_msg))
             time_num = self.parse_input(desc_line='how many {} would you like?'.format(time_stamp), tp=int, default=None,
-                                        i_msg='enter a number of {} for {} time limit, must be an integer'.format(time_stamp, min_max))
+                                        i_msg='enter a number of {} for {} time limit, must be an integer.\nFurther info:\n{}'.format(time_stamp, min_max, self.rs_time_i_msg))
             return "{} {}".format(time_stamp, str(time_num))
 
         if _min:
@@ -319,14 +331,13 @@ class cov_gen_CLI():
             r_d['max'] = insert_to_rd_min_mex(min_max='max')
 
         r_d_typ_lim = self.parse_input(desc_line='time limit type', tp=str, default=None, choices=['time', 'age'],
-                                       i_msg='pick a type of time limitation, time - absolute, age - relative')
+                                       i_msg='pick a type of time limitation, time - absolute, age - relative.\nFurther info:\n{}'.format(self.rs_time_i_msg))
         r_d['{}_limit'.format(r_d_typ_lim)] = True
         return r_d
 
     def add_fn(self):
         fn_name = self.parse_input(desc_line='function name', tp=str, default=None,
                                    i_msg='write a name for your function (again - wo spaces)) and then click enter')
-        # self.print("{} new function: {} {} ".format('-'*20, fn_name, '-'*20), HIGHLIGHT)
         self.print("{} new function: {}".format('-'*20, fn_name), HIGHLIGHT)
         fn_desc = self.parse_input(desc_line='function description (optional)', tp=str, default='',
                                    i_msg="write a description for your function.\n" +
@@ -336,7 +347,11 @@ class cov_gen_CLI():
 
         def add_restriction():
             self.print('Possible restrictions are: operators | recipients | amount | time')
-            restrictions_msg_i = ""
+            restrictions_msg_i = \
+                "Operators restriction:\n" + utils().indent(self.rs_operators_i_msg) + "" \
+                + "Recipients restriction:\n" + utils().indent(self.rs_recipients_i_msg) + "" \
+                + "Amount restriction:\n" + utils().indent(self.rs_amount_i_msg) + "" \
+                + "Time restriction:\n" + utils().indent(self.rs_time_i_msg)
             r = self.parse_input(desc_line='which restriction would you like to apply?', tp=str, default=None, choices=['o', 'r', 'a', 't'],
                                  i_msg=restrictions_msg_i)
             if r == 'o':
@@ -360,7 +375,6 @@ class cov_gen_CLI():
 
         self.cov_funcs_list.append((fn_name, fn_desc, fn_restrictions))
 
-        # self.print("{} end of function: {} {} ".format('-' * 20, fn_name, '-' * 20), HIGHLIGHT)
         self.print("{} end of function: {}".format('-' * 20, fn_name), HIGHLIGHT)
 
     def generate_cov(self):
