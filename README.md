@@ -55,20 +55,25 @@ After cloning this repo and installing all dependencies, use the covGen program 
 > ![Teaser image](./pictures/05_new_func.png)
 >
 > In order to achieve our goal we must add a restriction. In our case we would like to restrict the allowed operators of the spending function, there will be 2 in total.
+>
 > ![Teaser image](./pictures/06_add_restriction.png)
 >
 > We will now be asked if we’d like to add restrictions to this function. We do not. The program will now ask us if we’d like to add another function to this covenant. We do not.
+>
 > ![Teaser image](./pictures/07_end_func.png)
 >
-> We now have an option to compile the scripted to opcodes for further deployment in the bitcoin cash blockchain. For that we need to enter two file names, one for the cashScript file and one for the jason file. 
+> We now have an option to compile the scripted to opcodes for further deployment in the bitcoin cash blockchain. For that we need to enter two file names, one for the cashScript file and one for the jason file.
+> 
 > ![Teaser image](./pictures/08_end_contract.png)
 >
 > We get the output in both specified files ‘spendJcash.cash’ and ‘spendJjson.json’. 
 >
 > The cash file looks as follows:
+>
 > ![Teaser image](./pictures/09_cash.png)
 >
 > And the json file looks like this:
+>
 > ![Teaser image](./pictures/10_json.png)
 >
 > You can see that the source contract (the cashScript contract) is very long were the bytecode is a short and exact script
