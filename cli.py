@@ -59,6 +59,7 @@ class cov_gen_CLI():
         self.globals = ['-i', '-h', '-exit', '-clear']
         self.run()
 
+
     def print(self, s: str, c: str=None, end="\n"):
         if c is not None:
             print(colored(s, c), end=end)
@@ -227,26 +228,32 @@ class cov_gen_CLI():
         return self.parse_input(desc_line=question, tp=str, default=None, choices=['y', 'n'],
                                 i_msg='{}? type y or n and then enter)'.format(question))
 
+    rs_operators_i_msg = "Operator of a function is someone who is allowed to use (call) it.\n" \
+                         "Their public key and signature will be varified upon calling the function.\n" \
+                         "Note that if a function is composed solely of an operators restriction, then\n" \
+                         "these operators may create a transaction that calls this function and spend the\n" \
+                         "contract's funds freely."
     def fn_rs_operators(self):
         """ restrict operators """
         r_d = copy.deepcopy(cov_fn.restrict_operators_kwargs_d)
         r_d['n'] = self.parse_input(desc_line='number of desired operators', tp=int, default=1,
-                                    i_msg='Operators are the number of users that you would like to give could key access')
+                                    i_msg=self.rs_operators_i_msg)
         return r_d
 
+    rs_recipients_i_msg = "Recipient of a function is someone that appears on the transaction's output.\n" \
+                          "Recipients may be public keys (P2PKH) or contract addresses (P2SH).\n" \
+                          "Note that if a function is composed solely of a recipients restriction, without\n" \
+                          "requiring their signatures as well, then anyone can create any transaction given\n" \
+                          "that the output is (either one of, or all of) the pre-defined recipients."
     def fn_rs_recipients(self):
         """ restrict recipients """
         r_d = copy.deepcopy(cov_fn.restrict_recipients_kwargs_d)
-        i_text = 'Recipients are the number of users that you would like to give could hot access\n' \
-                 'these recipients can draw funds given that they fill the additional restrictions you set\n' \
-                 'but they are not operators of the account\n' \
-                 'recipients can be user public keys (P2PKH) or contract addresses (P2SH)'
 
         r_d['n_PKH'] = self.parse_input(desc_line='number of desired recipients (P2PKH)', tp=int, default=1,
-                                        i_msg=i_text)
+                                        i_msg=self.rs_recipients_i_msg)
 
         r_d['n_SH'] = self.parse_input(desc_line='number of desired contract recipients (P2SH)', tp=int, default=0,
-                                       i_msg=i_text)
+                                       i_msg=self.rs_recipients_i_msg)
 
         # todo: have roei check:
         r_d['require_recipient_sig'] = self._y_n_question('would you like to require a signature from the recipient?') == 'y'
@@ -328,13 +335,10 @@ class cov_gen_CLI():
         fn_restrictions = []
 
         def add_restriction():
-            Rs = ['-o- operators', '-r- recipients', '-a- amount', '-t- time']
-            restrict_txt = 'which restriction(s) would you like to apply?\n' \
-                           'your options are:\n{}' \
-                           '\ntype the first letter of one option and then click enter'.format('\n'.join(Rs))
-            self.print(restrict_txt, IN)
-            r = self.parse_input(desc_line='restriction', tp=str, default=None, choices=['o', 'r', 'a', 't'],
-                                 i_msg='type the first letter of one option and then click enter:\n{}'.format('\n'.join(Rs)))
+            self.print('Possible restrictions are: operators | recipients | amount | time')
+            restrictions_msg_i = ""
+            r = self.parse_input(desc_line='which restriction would you like to apply?', tp=str, default=None, choices=['o', 'r', 'a', 't'],
+                                 i_msg=restrictions_msg_i)
             if r == 'o':
                 r = 'operators'
                 r_args_d = self.fn_rs_operators()

@@ -32,11 +32,9 @@ async function create_wallet() {
 	Creates an HDnode and saves its info into w_json_f.
 	*/
 
-	if (NETWORK === 'mainnet') {
-		const bitbox = new BITBOX();
-	}
-	else {
-		const bitbox = new BITBOX({restURL: TESTNET_API});
+	let bitbox = new BITBOX();
+	if (NETWORK === 'testnet') {
+		bitbox = new BITBOX({restURL: TESTNET_API});
 	}
 
 	if (mnemonic === '') {
@@ -74,11 +72,9 @@ async function init_contract() {
 	This function creates and returns a new contract
 	*/
 
-	if (NETWORK === 'mainnet') {
-		const bitbox = new BITBOX();
-	}
-	else {
-		const bitbox = new BITBOX({restURL: TESTNET_API});
+	let bitbox = new BITBOX();
+	if (NETWORK === 'testnet') {
+		bitbox = new BITBOX({restURL: TESTNET_API});
 	}
 
 	// artifact
