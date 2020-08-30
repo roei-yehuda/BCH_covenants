@@ -79,6 +79,8 @@ After cloning this repo and installing all dependencies, use the covGen program 
 > This project is a school project at the ‘Hebrew University in Jerusalem’.
 The authors do not take responsibility for any malfunction or damage that may occur from a covenant generated in this platform.
 Be smart and be careful!
+>
+>
 
 
 
