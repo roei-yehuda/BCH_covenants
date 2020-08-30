@@ -398,7 +398,7 @@ class cov_gen():
 
     def _get_intro_comment_text(self):
         """
-        calculate the final string for the intro comment
+        calculate the final string for the intro_msg comment
         """
         if self.intro_comment == '':
             return ''

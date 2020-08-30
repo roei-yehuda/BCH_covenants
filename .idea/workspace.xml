@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6c103c48-6bb0-4c29-9a45-9629b69255c0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/js_bridge_template" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js_bridge.py" beforeDir="false" afterPath="$PROJECT_DIR$/js_bridge.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/covenant_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/covenant_generator.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,7 +13,8 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/BCH_covenants$CLI.coverage" NAME="CLI Coverage Results" MODIFIED="1598539225887" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/BCH_covenants$js_bridge.coverage" NAME="js_bridge Coverage Results" MODIFIED="1598766736503" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/BCH_covenants$CLI.coverage" NAME="CLI Coverage Results" MODIFIED="1598769638591" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/BCH_covenants$conv_gen.coverage" NAME="conv_gen Coverage Results" MODIFIED="1598550914995" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
@@ -23,14 +23,14 @@
         <counts>
           <entry key="project.closed" value="8" />
           <entry key="project.open.time.10" value="5" />
-          <entry key="project.open.time.11" value="2" />
+          <entry key="project.open.time.11" value="3" />
           <entry key="project.open.time.13" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.7" value="1" />
           <entry key="project.open.time.8" value="1" />
           <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="13" />
+          <entry key="project.opened" value="14" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -48,16 +48,16 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="1334" />
+          <entry key="Python Console" value="1406" />
           <entry key="js_bridge_template" value="2" />
-          <entry key="py" value="19862" />
+          <entry key="py" value="23321" />
           <entry key="spedn" value="70" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="72" />
-          <entry key="Python" value="21196" />
+          <entry key="Python" value="24727" />
         </counts>
       </usages-collector>
     </session>
@@ -70,34 +70,40 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/covenant_generator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7220">
-              <caret line="382" column="29" selection-start-line="382" selection-start-column="29" selection-end-line="382" selection-end-column="29" />
+            <state relative-caret-position="8075">
+              <caret line="427" column="43" selection-start-line="427" selection-start-column="37" selection-end-line="427" selection-end-column="43" />
               <folding>
                 <element signature="e#662#671#0" expanded="true" />
-                <marker date="1598627375464" expanded="true" signature="9908:9913" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cli.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="75" column="32" lean-forward="true" selection-start-line="75" selection-start-column="32" selection-end-line="75" selection-end-column="32" />
-              <folding>
-                <element signature="e#64#96#0" expanded="true" />
-                <marker date="1598716817671" expanded="true" signature="249:1323" ph="..." />
-                <marker date="1598716817671" expanded="true" signature="2337:2451" ph="..." />
-                <marker date="1598716817671" expanded="true" signature="2530:2542" ph="..." />
+                <marker date="1598721177817" expanded="true" signature="9908:9913" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/cli.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="346">
+              <caret line="192" column="36" lean-forward="true" selection-start-line="192" selection-start-column="36" selection-end-line="192" selection-end-column="36" />
+              <folding>
+                <element signature="e#64#96#0" expanded="true" />
+                <element signature="e#5156#7657#0" />
+                <marker date="1598769637434" expanded="true" signature="258:1335" ph="..." />
+                <marker date="1598769637434" expanded="true" signature="1583:1715" ph="..." />
+                <marker date="1598769637434" expanded="true" signature="4115:4127" ph="..." />
+                <marker date="1598769637434" expanded="true" signature="5707:5726" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js_bridge_template">
-          <provider selected="true" editor-type-id="text-editor" />
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="228">
+              <caret line="12" column="16" selection-start-line="12" selection-start-column="16" selection-end-line="12" selection-end-column="16" />
+            </state>
+          </provider>
         </entry>
       </file>
     </leaf>
@@ -128,6 +134,11 @@
       <find>with open</find>
       <find>self.print_comment</find>
       <find>self.print</find>
+      <find>file=f</find>
+      <find>_y_n_question</find>
+      <find>in_between_fns</find>
+      <find>MULTI</find>
+      <find>end</find>
     </findStrings>
     <replaceStrings>
       <replace>recipient</replace>
@@ -144,8 +155,8 @@
         <option value="$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/LastWill.spedn" />
         <option value="$PROJECT_DIR$/covenant_generator.py" />
         <option value="$PROJECT_DIR$/js_bridge.py" />
-        <option value="$PROJECT_DIR$/cli.py" />
         <option value="$PROJECT_DIR$/js_bridge_template" />
+        <option value="$PROJECT_DIR$/cli.py" />
       </list>
     </option>
   </component>
@@ -156,8 +167,7 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="8" />
-    <option name="y" value="31" />
+    <option name="y" value="23" />
     <option name="width" value="1920" />
     <option name="height" value="1017" />
   </component>
@@ -202,7 +212,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.js_bridge">
+  <component name="RunManager" selected="Python.CLI">
     <configuration name="CLI" type="PythonConfigurationType" factoryName="Python">
       <module name="BCH_covenants" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -289,16 +299,16 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="8" y="31" width="1920" height="1017" extended-state="0" />
+    <frame x="0" y="23" width="1920" height="1017" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49837133" visible="true" weight="0.18675996" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49837133" weight="0.23718387" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.50162864" side_tool="true" weight="0.2497309" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32990867" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32305935" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.41438356" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.48173517" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.49657536" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -306,8 +316,8 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="12" visible="true" weight="0.42922375" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32990867" />
+      <window_info anchor="bottom" id="Python Console" order="12" weight="0.25913242" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -330,43 +340,45 @@
     <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/ui.py" />
     <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/contract_finder.py" />
     <entry file="file://$PROJECT_DIR$/ignore/Electron-Cash-Last-Will-Plugin/last-will-plugin/last_will_contract.py" />
-    <entry file="file://$PROJECT_DIR$/covenant_generator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7220">
-          <caret line="382" column="29" selection-start-line="382" selection-start-column="29" selection-end-line="382" selection-end-column="29" />
-          <folding>
-            <element signature="e#662#671#0" expanded="true" />
-            <marker date="1598627375464" expanded="true" signature="9908:9913" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js_bridge.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="323">
           <caret line="68" column="35" lean-forward="true" selection-start-line="68" selection-start-column="8" selection-end-line="68" selection-end-column="35" />
-          <folding>
-            <marker date="1598694678707" expanded="true" signature="1420:1681" ph="..." />
-            <marker date="1598694678707" expanded="true" signature="1696:1705" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cli.py">
+    <entry file="file://$PROJECT_DIR$/covenant_generator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="75" column="32" lean-forward="true" selection-start-line="75" selection-start-column="32" selection-end-line="75" selection-end-column="32" />
+        <state relative-caret-position="8075">
+          <caret line="427" column="43" selection-start-line="427" selection-start-column="37" selection-end-line="427" selection-end-column="43" />
           <folding>
-            <element signature="e#64#96#0" expanded="true" />
-            <marker date="1598716817671" expanded="true" signature="249:1323" ph="..." />
-            <marker date="1598716817671" expanded="true" signature="2337:2451" ph="..." />
-            <marker date="1598716817671" expanded="true" signature="2530:2542" ph="..." />
+            <element signature="e#662#671#0" expanded="true" />
+            <marker date="1598721177817" expanded="true" signature="9908:9913" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js_bridge_template">
-      <provider selected="true" editor-type-id="text-editor" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="228">
+          <caret line="12" column="16" selection-start-line="12" selection-start-column="16" selection-end-line="12" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cli.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="346">
+          <caret line="192" column="36" lean-forward="true" selection-start-line="192" selection-start-column="36" selection-end-line="192" selection-end-column="36" />
+          <folding>
+            <element signature="e#64#96#0" expanded="true" />
+            <element signature="e#5156#7657#0" />
+            <marker date="1598769637434" expanded="true" signature="258:1335" ph="..." />
+            <marker date="1598769637434" expanded="true" signature="1583:1715" ph="..." />
+            <marker date="1598769637434" expanded="true" signature="4115:4127" ph="..." />
+            <marker date="1598769637434" expanded="true" signature="5707:5726" ph="..." />
+          </folding>
+        </state>
+      </provider>
     </entry>
   </component>
 </project>
