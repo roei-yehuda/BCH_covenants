@@ -21,17 +21,18 @@ class js_bridge():
         self.args = {
             'NETWORK': 'testnet',
             'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
-            'TESTNET_API': '',  # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
+            'TESTNET_API': 'https://free-test.fullstack.cash/v3/',  # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
             'W_JSON': 'wallet.json',
             'MNEMONIC': '',
-            'CHILD_I': 0,
+            'CHILD_I': '0',
             'CASH_F': 'cov.cash',
             'ARTIFACT_F': 'cov.json',
             'C_JSON': '_cov_info.json',
             'DO_COMPILE': 'true',
+            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',     # new ElectrumProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
             'CONSTRUCTOR_ARGS': '',
-            'TX_FUNC': '',
-            'MAIN': ''
+            'TX_FUNC': '',  # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
+            'MAIN': "console.log('Wassup??');"
         }
         self.js_template_path = 'js_bridge_template'
         self.js_temp_code_path = '_temp_js_code.ts'
@@ -47,8 +48,7 @@ class js_bridge():
         with open(self.js_temp_code_path, "w") as f:
             print(js_code, file=f)
 
-        os.system("ts-node " + self.js_temp_code_path)
-
+        # os.system("ts-node " + self.js_temp_code_path)
 
 
 class cov_gen_CLI():
@@ -331,58 +331,7 @@ class cov_gen_CLI():
 
 
 if __name__ == '__main__':
-    cov_gen_CLI()
+    j = js_bridge()
+    j.run()
 
-
-
-"""
-# Avigail's tasks:
-# - tx.time vs tx.age
-# - add an option to remove fn
-
-
-def enter_param(name='', tp=str, has_default=True, default=None):
-    print('enter ' + name + (' [' + str(default) + ']: ') if has_default else ':')
-    my_input = input()
-    if has_default and my_input == '':
-        return default
-    try:
-        return tp(my_input)
-    except ValueError:
-        print(str(my_input) + ' is not of type ' + str(tp) + ', try again')
-        enter_param(name, tp, has_default, default)
-
-
-def create_cov_gen():
-    contract_name = enter_param(name='contract name', tp=str, has_default=True, default='cov')
-    cashscript_pragma = enter_param(name='cashscript pragma', tp=str, has_default=True, default='0.4.0')
-    miner_fee = enter_param(name='miner fee', tp=int, has_default=True, default=1000)
-    intro_comment = enter_param(name='intro_msg comment', tp=str, has_default=True, default='')
-    my_cov = cov_gen(contract_name, cashscript_pragma, miner_fee, intro_comment)
-    # print(contract_name, cashscript_pragma, str(miner_fee), intro_comment, sep='\n')
-    return my_cov
-
-
-def limit_players():
-    pass
-
-
-def create_function():
-    pass
-
-
-def my_main():
-    options = 'could - could key participants \n' \
-              'hot - hot key participants'
-    init_str = 'Hello, \n' \
-               'what restrictions would you like to put on your money in BCH? \n' \
-               'your options are: \n\n' + options + '\n\nlets start!\n'
-
-    print(init_str)
-    my_cov = create_cov_gen()
-    print()
-
-    pass
-
-
-"""
+    # cov_gen_CLI()
