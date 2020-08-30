@@ -53,6 +53,41 @@ class js_bridge():
 
 class cov_gen_CLI():
 
+    # restrictions info massages:
+    rs_operators_i_msg = "Operator of a function is someone who is allowed to use (call) it.\n" \
+                         "Their public key and signature will be verified upon calling the function.\n" \
+                         "- Note that if a function is composed solely of an operators restriction, then\n" \
+                         "  these operators may create a transaction that calls this function and spend the\n" \
+                         "  contract's funds freely."
+    rs_recipients_i_msg = "Recipient of a function is someone that appears on the transaction's output.\n" \
+                          "Recipients may be public keys (P2PKH) or contract addresses (P2SH).\n" \
+                          "- If the recipients are required for a signature as well (relevant for PKH recipients),\n" \
+                          "  this means they have to be of the signers of the transaction, i.e. only one of the \n" \
+                          "  recipients can call this function.\n" \
+                          "- Any or all: It is possible to allow any (one) of the recipients to get the funds, or \n" \
+                          "  demand that all of them get an equal share every time this function is called.\n" \
+                          "- Note that if a function is composed solely of a recipients restriction, and\n" \
+                          "  without requiring their signatures, then anyone can create any transaction given\n" \
+                          "  that the output is (either one of, or all of) the pre-defined recipients."
+    rs_amount_i_msg = "The amount of money in the transaction (in satoshis) can be restricted per the \n" \
+                      "transaction, per a recipient i.e. output, or both."
+    rs_time_i_msg = "The time of the transaction can be restricted to be within a certain period.\n" \
+                    "- 'time' vs 'age': \n" \
+                    "  It is possible to use either a a relative time restriction (using tx.time), or\n" \
+                    "  an absolute one (using tx.age). Note that due to limitations in the Bitcoin \n" \
+                    "  Script time can only be used with MIN, age can be used with MIN or MAX.\n" \
+                    "- 'time' and 'age' can be either a block number or a time stamp\n" \
+                    "- 'min' vs 'max':\n" \
+                    "  If min is defined, then the funds must be pulled after the TIME specified.\n" \
+                    "  If max is defined, the funds must be pulled before the TIME specified."
+    rs_i_msg = "Operators restriction:\n" + utils().indent(rs_operators_i_msg) + "" \
+                + "Recipients restriction:\n" + utils().indent(rs_recipients_i_msg) + "" \
+                + "Amount restriction:\n" + utils().indent(rs_amount_i_msg) + "" \
+                + "Time restriction:\n" + utils().indent(rs_time_i_msg)
+    add_fn_i_msg = "A contract consists of functions. Each function is composed of restrictions,\n" \
+                   " i.e. requirements, which must all be met in order to access the funds stored\n" \
+                   "in the contract."
+    add_rs_i_msg = add_fn_i_msg + "\n" + rs_i_msg
 
     def __init__(self):
         # global commands - the user may input these commands at any point
@@ -128,8 +163,10 @@ class cov_gen_CLI():
                    '\tEach function includes at least one restriction (requirement).\n' +
                    '\tIn order to use a contract (e.g. spend money from it), one interacts\n' +
                    '\twith one of its functions and has to meet all of its restrictions.')
-
-        while self._y_n_question('would you like to add another function?') == 'y':
+        add_fn_i_msg = "A contract consists of functions. Each function is composed of restrictions,\n" \
+                       " i.e. requirements, which must all be met in order to access the funds stored\n" \
+                       "in the contract."
+        while self._y_n_question('would you like to add another function?', i_msg=self.add_fn_i_msg) == 'y':
             self.add_fn()
         self.print('\n', REG)
         self.generate_cov()
@@ -230,11 +267,6 @@ class cov_gen_CLI():
         return self.parse_input(desc_line=question, tp=str, default=None, choices=['y', 'n'],
                                 i_msg=i_msg)
 
-    rs_operators_i_msg = "Operator of a function is someone who is allowed to use (call) it.\n" \
-                         "Their public key and signature will be verified upon calling the function.\n" \
-                         "- Note that if a function is composed solely of an operators restriction, then\n" \
-                         "  these operators may create a transaction that calls this function and spend the\n" \
-                         "  contract's funds freely."
     def fn_rs_operators(self):
         """ restrict operators """
         r_d = copy.deepcopy(cov_fn.restrict_operators_kwargs_d)
@@ -242,16 +274,7 @@ class cov_gen_CLI():
                                     i_msg=self.rs_operators_i_msg)
         return r_d
 
-    rs_recipients_i_msg = "Recipient of a function is someone that appears on the transaction's output.\n" \
-                          "Recipients may be public keys (P2PKH) or contract addresses (P2SH).\n" \
-                          "- If the recipients are required for a signature as well (relevant for PKH recipients),\n" \
-                          "  this means they have to be of the signers of the transaction, i.e. only one of the \n" \
-                          "  recipients can call this function.\n" \
-                          "- Any or all: It is possible to allow any (one) of the recipients to get the funds, or \n" \
-                          "  demand that all of them get an equal share every time this function is called.\n" \
-                          "- Note that if a function is composed solely of a recipients restriction, and\n" \
-                          "  without requiring their signatures, then anyone can create any transaction given\n" \
-                          "  that the output is (either one of, or all of) the pre-defined recipients."
+
     def fn_rs_recipients(self):
         """ restrict recipients """
         r_d = copy.deepcopy(cov_fn.restrict_recipients_kwargs_d)
@@ -271,8 +294,7 @@ class cov_gen_CLI():
 
         return r_d
 
-    rs_amount_i_msg = "The amount of money in the transaction (in satoshis) can be restricted per the \n" \
-                      "transaction, per a recipient i.e. output, or both."
+
     def fn_rs_amount(self):
         """ restrict the amount that can be pulled in a transaction """
         r_d = copy.deepcopy(cov_fn.restrict_amount_kwargs_d)
@@ -290,15 +312,6 @@ class cov_gen_CLI():
                                                                i_msg=self.rs_amount_i_msg)
         return r_d
 
-    rs_time_i_msg = "The time of the transaction can be restricted to be within a certain period.\n" \
-                    "- 'time' vs 'age': \n" \
-                    "  It is possible to use either a a relative time restriction (using tx.time), or\n" \
-                    "  an absolute one (using tx.age). Note that due to limitations in the Bitcoin \n" \
-                    "  Script time can only be used with MIN, age can be used with MIN or MAX.\n" \
-                    "- 'time' and 'age' can be either a block number or a time stamp\n" \
-                    "- 'min' vs 'max':\n" \
-                    "  If min is defined, then the funds must be pulled after the TIME specified.\n" \
-                    "  If max is defined, the funds must be pulled before the TIME specified."
 
     def fn_rs_time(self):
         """ create a time window for cancellation """
@@ -335,6 +348,7 @@ class cov_gen_CLI():
         r_d['{}_limit'.format(r_d_typ_lim)] = True
         return r_d
 
+
     def add_fn(self):
         fn_name = self.parse_input(desc_line='function name', tp=str, default=None,
                                    i_msg='write a name for your function (again - wo spaces)) and then click enter')
@@ -347,13 +361,8 @@ class cov_gen_CLI():
 
         def add_restriction():
             self.print('Possible restrictions are: operators | recipients | amount | time')
-            restrictions_msg_i = \
-                "Operators restriction:\n" + utils().indent(self.rs_operators_i_msg) + "" \
-                + "Recipients restriction:\n" + utils().indent(self.rs_recipients_i_msg) + "" \
-                + "Amount restriction:\n" + utils().indent(self.rs_amount_i_msg) + "" \
-                + "Time restriction:\n" + utils().indent(self.rs_time_i_msg)
             r = self.parse_input(desc_line='which restriction would you like to apply?', tp=str, default=None, choices=['o', 'r', 'a', 't'],
-                                 i_msg=restrictions_msg_i)
+                                 i_msg=self.rs_i_msg)
             if r == 'o':
                 r = 'operators'
                 r_args_d = self.fn_rs_operators()
@@ -370,7 +379,7 @@ class cov_gen_CLI():
             fn_restrictions.append((r, r_args_d))
 
         # add restrictions in a while loop
-        while self._y_n_question('would you like to add another restriction?') == 'y':
+        while self._y_n_question('would you like to add another restriction?', i_msg=self.add_rs_i_msg) == 'y':
             add_restriction()
 
         self.cov_funcs_list.append((fn_name, fn_desc, fn_restrictions))
