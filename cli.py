@@ -2,6 +2,7 @@
 from covenant_generator import *
 from termcolor import colored
 import copy
+import os
 import sys
 import re
 
@@ -86,10 +87,10 @@ class cov_gen_CLI():
                         "* At any given moment you can type '-i' for more information about the specific point you are at,\n" \
                         "  as well as '-h' to get general instructions for usage of this command line interface (CLI).\n" \
                         "  If this is your first time here, you are encouraged to try both now.\n" \
-                        "\n" \
+                        "\n"
 
             # use color on -i and -h
-            a, b, c  = re.split('-i|-h', intro_msg)
+            a, b, c = re.split('-i|-h', intro_msg)
             print(colored(a, REG), end='')
             print(colored('-i', 'yellow'), end='')
             print(colored(b, REG), end='')
@@ -109,20 +110,6 @@ class cov_gen_CLI():
 
             return createContract
 
-
-
-
-        # # print intro_msg:
-        # # Rs = ['-o- operators', '-r- recipients', '-a- amount', '-t- time']
-        # options = ['operators - could key participants ',
-        #            'recipients - hot key participants',
-        #            'amount - the max amount that can be drawn at any transaction',
-        #            'time - waiting period in which the transaction can be evoked']
-        # intro_msg = 'Hello, \n' \
-        #         'what restrictions would you like to put on your money in BCH? \n' \
-        #         'your options are: \n\n{}\n\nlets start!\n'.format('\n'.join(options))
-        # self.print(self.intro_msg)
-
         # print intro msg and ask if the user wants to create a new contract or use an existing one
         create_contract = print_intro()
 
@@ -135,7 +122,7 @@ class cov_gen_CLI():
 
         self.set_init()
 
-        self.print("\nGood, now that we have the basic, let's write the functions.\n" +
+        self.print("\nGood, now that we have the basics, let's write the functions.\n" +
                    "\tIn a nutshell, a smart contract is composed of functions.\n" +
                    '\tEach function includes at least one restriction (requirement).\n' +
                    '\tIn order to use a contract (e.g. spend money from it), one interacts\n' +
@@ -174,8 +161,7 @@ class cov_gen_CLI():
                                                                default='',
                                                                choices=None,
                                                                i_msg='This comment will appear at the very start of the .cash script,\n'
-                                                                     'so it is best used for a general description of the contract or some important notes.\n'
-                                                                     'if multi')
+                                                                     'so it is best used for a general description of the contract or some important notes.\n')
         return
 
     def parse_input(self,
@@ -293,7 +279,8 @@ class cov_gen_CLI():
     def add_fn(self):
         fn_name = self.parse_input(desc_line='function name', tp=str, default=None,
                                    i_msg='write a name for your function (again - wo spaces)) and then click enter')
-        self.print("{} new function: {} {} ".format('-'*20, fn_name, '-'*20), HIGHLIGHT)
+        # self.print("{} new function: {} {} ".format('-'*20, fn_name, '-'*20), HIGHLIGHT)
+        self.print("{} new function: {}".format('-'*20, fn_name), HIGHLIGHT)
         fn_desc = self.parse_input(desc_line='function description (optional)', tp=str, default='',
                                    i_msg="write a description for your function.\n" +
                                          "This will appear right after the function's signature line.\n" +
@@ -330,7 +317,8 @@ class cov_gen_CLI():
 
         self.cov_funcs_list.append((fn_name, fn_desc, fn_restrictions))
 
-        self.print("{} end of function: {} {} ".format('-' * 20, fn_name, '-' * 20), HIGHLIGHT)
+        # self.print("{} end of function: {} {} ".format('-' * 20, fn_name, '-' * 20), HIGHLIGHT)
+        self.print("{} end of function: {}".format('-' * 20, fn_name), HIGHLIGHT)
 
     def generate_cov(self):
         cg = cov_gen(**self.cov_init_args)
