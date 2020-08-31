@@ -5,6 +5,7 @@
 
  **Dependencies:** 
 ![Python 3.6](https://img.shields.io/badge/python-3.6-green.svg?style=plastic)
+![crypto-hashing](https://img.shields.io/badge/crypto_hashing-1.0.0-purple.svg?style=plastic)
 ![cashscript 0.4.0](https://img.shields.io/badge/cashscript-0.4.0-blue.svg?style=plastic)
 ![cashc_compiler ](https://img.shields.io/badge/cashc_compiler--blue.svg?style=plastic)
 ![TypeScript 9.0.0](https://img.shields.io/badge/TypeScript-9.0.0-blue.svg?style=plastic)
@@ -48,10 +49,11 @@ The covGen is a command line interface run by python that generates covenants an
       - 'min' vs 'max':\
         If min is defined, then the funds must be pulled after the TIME specified\
         If max is defined, the funds must be pulled before the TIME specified.
+
  - **Interaction with deployed contracts**
 
 ## Usage
-After cloning this repo and installing all dependencies, use the covGen program through `python3 covGen.py`
+After cloning this repo and installing all dependencies, run the covGen program through `python3 covGen.py`
 
 ## Examples
  **Example 1 - Joint account:**
