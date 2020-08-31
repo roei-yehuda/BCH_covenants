@@ -51,6 +51,13 @@ In addition, covGen allows the instantiation of compiled smart contracts, as wel
       - 'min' vs 'max':\
         If min is defined, then the funds must be pulled after the TIME specified\
         If max is defined, the funds must be pulled before the TIME specified.
+    - **Updatability**\
+    At the end of this covGen we give the user an option to add an Updatability function.
+    This function gives specific users the ability to withdraw all the money and send it to another contract.
+    This is a P2SH transaction output.
+    In general there are two ways to update a contract in Bitcoin Cash, one by accessing the bytecode of the transactions signature and deploying the funds to the new bytecode (simulated state),
+    and the other by creating a whole new contract and sending the funds to the new bytecode. 
+    The outcome is the same, our solution is the second one, which allows a freer hand in changing the covenant and maintaining fungibility.
 
  - **Instantiation and use of smart contracts**
     - **Instantiation and deployment:**\
