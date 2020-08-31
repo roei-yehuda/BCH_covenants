@@ -255,8 +255,8 @@ And the json file looks like this:
   "updatedAt": "2020-08-31T08:56:30.416Z"
 }
 ```
-## References 
-[‘Bitcoin Covenants’]((https://maltemoeser.de/paper/covenants.pdf))\
+## References  
+[‘Bitcoin Covenants’](https://maltemoeser.de/paper/covenants.pdf)\
 [Smart contracts on Ethereum, Bitcoin and Bitcoin Cash](https://kalis.me/smart-contracts-eth-btc-bch/)\
 [CashScript - Smart contracts for Bitcoin Cash](https://cashscript.org/)\
 [BCH Covenants with Spedn](https://read.cash/@pein/bch-covenants-with-spedn-c1170a02)
