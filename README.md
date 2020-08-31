@@ -1,5 +1,6 @@
 # covGen - smart contracts generator for Bitcoin Cash
-> **Abstract:** *covGen is a program for creation and management of smart contracts on Bitcoin Cash (BCH).  Its command-line interface (CLI) allows the user to draft a smart contract, including covenants, compile it and then deploy it on the blockchain, as well as interact with it.*
+ ![Teaser image](./pictures/logo-01.png)
+>**Abstract:** *covGen is a program for creation and management of smart contracts on Bitcoin Cash (BCH).  Its command-line interface (CLI) allows the user to draft a smart contract, including covenants, compile it and then deploy it on the blockchain, as well as interact with it.*
 >
 > **Dependencies:** 
 ![Python 3.6](https://img.shields.io/badge/python-3.6-green.svg?style=plastic)
