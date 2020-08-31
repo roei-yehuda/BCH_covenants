@@ -1,16 +1,18 @@
 # covGen - Smart Contracts Generator for Bitcoin Cash
 #### *covGen is a program for creation and management of smart contracts on Bitcoin Cash (BCH). Its command-line interface (CLI) allows the user to draft a smart contract, including covenants, compile it and then deploy it on the blockchain, as well as interact with it.*
+
 ![Teaser image](./pictures/logo-01.png)  
 
  **Dependencies:** 
 ![Python 3.6](https://img.shields.io/badge/python-3.6-green.svg?style=plastic)
+![crypto_hashing 1.0.0](https://img.shields.io/badge/crypto_hashing-1.0.0-purple.svg?style=plastic)
 ![cashscript 0.4.0](https://img.shields.io/badge/cashscript-0.4.0-blue.svg?style=plastic)
 ![cashc_compiler ](https://img.shields.io/badge/cashc_compiler--blue.svg?style=plastic)
 ![TypeScript 9.0.0](https://img.shields.io/badge/TypeScript-9.0.0-blue.svg?style=plastic)
 ![node _](https://img.shields.io/badge/node--blue.svg?style=plastic)
 
 ## Introduction
-Bitcoin contracts can restrict how much funds can be withdrawn from a contract, but as of today they cannot restrict who can withdraw those funds. Restricting what can be done with funds is what covenants are all about. A suggestion on how to implement covenants in bitcoin was presented in a paper titled ‘Bitcoin Covenants’ by Malte M¨oser, Ittay Eyal and Emin G¨un Sirer<sup>[1](https://maltemoeser.de/paper/covenants.pdf)</sup>. In order to make it work two new opcodes need to be added to the bitcoin operation codes.\
+Bitcoin contracts can restrict how much funds can be withdrawn from a contract, but as of today they cannot restrict who can withdraw those funds. Restricting what can be done with funds is what covenants are all about. A suggestion on how to implement covenants in bitcoin was presented in a paper titled ‘Bitcoin Covenants’ by Malte M¨oser, Ittay Eyal and Emin G¨un Sirer<sup>[1](https://maltemoeser.de/paper/covenants.pdf)</sup>. In order to make it work two new opcodes need to be added to the bitcoin operation codes.
 
 In 2017 bitcoin cash (BCH) hard forked from bitcoin (BTC), the reason being opcodes. Two opcodes that enable covenants in bitcoin cash are OP_CHECKSIG and OP_CHECKDATASIG. The added expressiveness of these opcodes allow for more expressive smart contracts, including covenants, in the bitcoin cash blockchain. From now on everything we will be discussing will be in BTH.
 
@@ -47,10 +49,11 @@ The covGen is a command line interface run by python that generates covenants an
       - 'min' vs 'max':\
         If min is defined, then the funds must be pulled after the TIME specified\
         If max is defined, the funds must be pulled before the TIME specified.
+
  - **Interaction with deployed contracts**
 
 ## Usage
-After cloning this repo and installing all dependencies, use the covGen program through `python3 covGen.py`
+After cloning this repo and installing all dependencies, run the covGen program through `python3 covGen.py`
 
 ## Examples
  **Example 1 - Joint account:**
@@ -153,11 +156,112 @@ And the json file looks like this:
 
 You can see that the source contract (the cashScript contract) is very long were the bytecode is a short and exact script
 
-**Example 2 - Joint account with amount limit:**
-In this example we will not go through all the steps, but we will 
- 
-## References 
-# TODO
+**Example 2 - Joint account with amount limit:**\
+In this example we will not go through all the steps.
+We will create a similar contract to example 1 and add an additional function 'covenant' that limits the amount that the operator can withdraw and gives a time window in which the cold key operators can revoke the transaction.\
+The new function is created in the in the interface as follows\
+![Teaser image](./pictures/exp2_01_function2_Copy.png)
+
+The contract generated in cashScript looks as follows with both function in place:
+ ```
+/*
+This covenant is the second example, it has a cold function with no restriction and a hot function with time and amount restrictions
+*/
+
+pragma cashscript ^0.4.0;
+
+contract Cold_w_Hot(bytes20 operator_0_pkh_JointSpend, bytes20 operator_1_pkh_JointSpend, bytes20 operator_0_pkh_covenant){
+
+	function JointSpend(pubkey pk, sig s) {
+		/*
+		this is the joint account from example 1
+		*/
+		// *** restrict operators
+		require(hash160(pk) == operator_0_pkh_JointSpend || hash160(pk) == operator_1_pkh_JointSpend);
+		require(checkSig(s, pk));
+	}
+
+	function covenant(pubkey pk, sig s) {
+		/*
+		this is a hot key function that has limited spending and can be revoked by the cold key within the time window
+		*/
+		// *** restrict operators
+		require(hash160(pk) == operator_0_pkh_covenant);
+		require(checkSig(s, pk));
+		// *** restrict amount
+		int minerFee = 1000; // hardcoded fee
+		int intTxVal = int(bytes(tx.value));
+		// restrict amount per tx
+		require(intTxVal <= 50000 + minerFee);
+		// *** restrict time of tx
+		require(tx.age >= weeks 1);
+	}
+}
+```
+
+And the json file looks like this:
+```
+{
+  "contractName": "Cold_w_Hot",
+  "constructorInputs": [
+    {
+      "name": "operator_0_pkh_JointSpend",
+      "type": "bytes20"
+    },
+    {
+      "name": "operator_1_pkh_JointSpend",
+      "type": "bytes20"
+    },
+    {
+      "name": "operator_0_pkh_covenant",
+      "type": "bytes20"
+    }
+  ],
+  "abi": [
+    {
+      "name": "JointSpend",
+      "covenant": false,
+      "inputs": [
+        {
+          "name": "pk",
+          "type": "pubkey"
+        },
+        {
+          "name": "s",
+          "type": "sig"
+        }
+      ]
+    },
+    {
+      "name": "covenant",
+      "covenant": true,
+      "inputs": [
+        {
+          "name": "pk",
+          "type": "pubkey"
+        },
+        {
+          "name": "s",
+          "type": "sig"
+        }
+      ]
+    }
+  ],
+  "bytecode": "OP_3 OP_PICK OP_0 OP_NUMEQUAL OP_IF OP_4 OP_PICK OP_HASH160 OP_EQUAL OP_4 OP_PICK OP_HASH160 OP_ROT OP_EQUAL OP_BOOLOR OP_VERIFY OP_2SWAP OP_CHECKSIG OP_NIP OP_NIP OP_ELSE OP_3 OP_ROLL OP_1 OP_NUMEQUALVERIFY OP_3 OP_PICK OP_SIZE 34 OP_SUB OP_SPLIT OP_NIP OP_8 OP_SPLIT OP_DROP OP_5 OP_PICK OP_HASH160 OP_4 OP_ROLL OP_EQUALVERIFY OP_2ROT OP_2DUP OP_SWAP OP_SIZE OP_1SUB OP_SPLIT OP_DROP OP_7 OP_ROLL OP_SHA256 OP_ROT OP_CHECKDATASIGVERIFY OP_CHECKSIGVERIFY e803 OP_SWAP OP_BIN2NUM 50c300 OP_ROT OP_ADD OP_LESSTHANOREQUAL OP_VERIFY OP_1 OP_CHECKSEQUENCEVERIFY OP_2DROP OP_DROP OP_1 OP_ENDIF",
+  "source": "/*\r\nThis covenant is the second example, it has a cold function with no restriction and a hot function with time and amount restrictions\r\n*/\r\n\r\npragma cashscript ^0.4.0;\r\n\r\ncontract Cold_w_Hot(bytes20 operator_0_pkh_JointSpend, bytes20 operator_1_pkh_JointSpend, bytes20 operator_0_pkh_covenant){\r\n\r\n\tfunction JointSpend(pubkey pk, sig s) {\r\n\t\t/*\r\n\t\tthis is the joint account from example 1\r\n\t\t*/\r\n\t\t// *** restrict operators\r\n\t\trequire(hash160(pk) == operator_0_pkh_JointSpend || hash160(pk) == operator_1_pkh_JointSpend);\r\n\t\trequire(checkSig(s, pk));\r\n\t}\r\n\r\n\tfunction covenant(pubkey pk, sig s) {\r\n\t\t/*\r\n\t\tthis is a hot key function that has limited spending and can be revoked by the cold key within the time window\r\n\t\t*/\r\n\t\t// *** restrict operators\r\n\t\trequire(hash160(pk) == operator_0_pkh_covenant);\r\n\t\trequire(checkSig(s, pk));\r\n\t\t// *** restrict amount\r\n\t\tint minerFee = 1000; // hardcoded fee\r\n\t\tint intTxVal = int(bytes(tx.value));\r\n\t\t// restrict amount per tx\r\n\t\trequire(intTxVal <= 50000 + minerFee);\r\n\t\t// *** restrict time of tx\r\n\t\trequire(tx.age >= weeks 1);\r\n\t}\r\n\r\n}\r\n",
+  "networks": {},
+  "compiler": {
+    "name": "cashc",
+    "version": "0.4.3"
+  },
+  "updatedAt": "2020-08-31T08:56:30.416Z"
+}
+```
+## References  
+[‘Bitcoin Covenants’](https://maltemoeser.de/paper/covenants.pdf)\
+[Smart contracts on Ethereum, Bitcoin and Bitcoin Cash](https://kalis.me/smart-contracts-eth-btc-bch/)\
+[CashScript - Smart contracts for Bitcoin Cash](https://cashscript.org/)\
+[BCH Covenants with Spedn](https://read.cash/@pein/bch-covenants-with-spedn-c1170a02)
 ## Disclaimer
 This project is a school project at the ‘Hebrew University in Jerusalem’.
 The authors do not take responsibility for any malfunction or damage that may occur from a covenant generated in this platform.
