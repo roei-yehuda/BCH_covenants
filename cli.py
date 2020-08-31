@@ -84,8 +84,8 @@ class cov_gen_CLI():
                       "transaction, per a recipient i.e. output, or both."
     rs_time_i_msg = "The time of the transaction can be restricted to be within a certain period.\n" \
                     "- 'time' vs 'age': \n" \
-                    "  It is possible to use either a a relative time restriction (using tx.time), or\n" \
-                    "  an absolute one (using tx.age). Note that due to limitations in the Bitcoin \n" \
+                    "  It is possible to use either a relative time restriction (using tx.age), or\n" \
+                    "  an absolute one (using tx.time). Note that due to limitations in the Bitcoin \n" \
                     "  Script time can only be used with MIN, age can be used with MIN or MAX.\n" \
                     "- 'time' and 'age' can be either a block number or a time stamp\n" \
                     "- 'min' vs 'max':\n" \
