@@ -53,8 +53,15 @@ The covGen is a command line interface run by python that generates covenants an
  - **Interaction with deployed contracts**
 
 ## Usage
-After cloning this repo and installing all dependencies, run the covGen program through `python3 covGen.py`
-
+After cloning this repo and installing all dependencies, run the covGen program through `python3 covGen.py`\
+There are three global commands that can be called at any given moment for assistance:\
+ - -h:\
+ by calling '-h' you wil receive help on a global level, information about the global commands.
+ - -i:\
+ '-i' gives you information specific to the place in the code that it is called.
+ - -exit:\
+ '-exit' will exit the code and terminate the contract you are in the process of building.
+ 
 ## Examples
  **Example 1 - Joint account:**
  
