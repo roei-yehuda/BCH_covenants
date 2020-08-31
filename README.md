@@ -54,7 +54,7 @@ The covGen is a command line interface run by python that generates covenants an
 
 ## Usage
 After cloning this repo and installing all dependencies, run the covGen program through `python3 covGen.py`\
-There are three global commands that can be called at any given moment for assistance:\
+There are three global commands that can be called at any given moment for assistance:
  - -h:\
  by calling '-h' you wil receive help on a global level, information about the global commands.
  - -i:\
