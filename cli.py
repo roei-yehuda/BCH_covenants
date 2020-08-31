@@ -221,7 +221,7 @@ class cov_gen_CLI():
                                                            choices is None or not show_choice) else " {" + ', '.join(
                                                        choices) + "}",
                                                    sep=' ' if desc_line == '' or desc_line.endswith(
-                                                       ("?", "\n", "-")) else ': '), IN, end)
+                                                       ("?", "\n", "-", "=")) else ': '), IN, end)
         my_input = input().strip()
 
         # help and global functions
@@ -263,6 +263,7 @@ class cov_gen_CLI():
 
     def _exit(self):
         """ exit the program """
+        self.print("Exiting. Goodbye", HIGHLIGHT)
         sys.exit(0)
 
     def _y_n_question(self, question: str, i_msg=None):
@@ -487,7 +488,8 @@ class create_contract_CLI(cov_gen_CLI):
             self.add_fn()
         self.print('\n', REG)
         self.generate_cov()
-        self.print("Exiting. Goodbye", HIGHLIGHT)
+        # self.print("Exiting. Goodbye", HIGHLIGHT)
+        self._exit()
 
 
     def set_init(self):
@@ -693,21 +695,29 @@ class use_contract_CLI(cov_gen_CLI):
 
         self.set_constructor()
 
+        self.print("Finaly we can get to business.", HIGHLIGHT)
+        self.print("\tFrom this point on the CLI will ask you to choose an action, if you wish\n"
+                   "\tto finish up just type '-exit'")
 
+        action = self.parse_input(desc_line="would you like to instantiate (init) a contract, or operate an \ninstantiated one (use)?",
+                                                  default=None,
+                                                  choices=['init', 'use'],
+                                                  i_msg='Choose an action. You can always type in -h for general instructions.')
 
-        self.print("\nGood, now that we have the basics, let's write the functions.\n" +
-                   "\tIn a nutshell, a smart contract is composed of functions.\n" +
-                   '\tEach function includes at least one restriction (requirement).\n' +
-                   '\tIn order to use a contract (e.g. spend money from it), one interacts\n' +
-                   '\twith one of its functions and has to meet all of its restrictions.')
-        while self._y_n_question('would you like to add a new function?', i_msg=self.add_fn_i_msg) == 'y':
-            self.add_fn()
-        self.print('\n', REG)
-        self.generate_cov()
+        while action is not None:
+            if action == 'init':
+                self.init_contract()
+            else:
+                self.use_contract()
 
 
     def set_init(self):
-        self.print('Before we start interacting with the contract, we need to set some basics first:')
+        self.print('Before we start interacting with the contract, we need to set some basics first.')
+        self.print("Currently, all your parameters are set to default:", IN)
+        self.print(utils.indent("\n".join(["{} = {}".format(k, self.js_args[k]) for k in self.js_args.keys()])))
+
+        if 'n' == self._y_n_question('would you like to change any of them?'):
+            return
 
         # self.args = {
         ##     'DEBUG': 'false',
@@ -865,8 +875,90 @@ class use_contract_CLI(cov_gen_CLI):
         self.cons_args = cons_args
         self.js_args['CONSTRUCTOR_ARGS'] = ', '.join([cons_args[k][2] for k in [constructorInputs[i]["name"] for i in range(len(constructorInputs))]])
 
+    def init_contract(self):
+        self.js_args['MAIN'] = "init_contract();\nprint_contract_info();"
+        self.js_run()
 
+    def use_contract(self):
 
+        abi = None
+        if os.path.exists(self.js_args['ARTIFACT_F']):
+            with open(self.js_args['ARTIFACT_F']) as f:
+                artifact_data = json.load(f)
+            abi = artifact_data['abi']
+
+        if abi is None or len(abi)==0:
+            self.print("Err: not able to get abi from the artifact, or abi is empty", ERR)
+            return
+
+        self.print("We will now create the transaction which interacts with the contract.")
+
+        minerFee = self.parse_input(desc_line="set miner fee (in satoshis)",
+                              default='1000',
+                              choices=None,
+                              i_msg="The miner fee is hardcoded to the transaction.")
+
+        func = self.parse_input(desc_line="Which function would you like to call?",
+                              default=None,
+                              choices=[func_d["name"] for func_d in abi],
+                              i_msg='Choose a function to call with the current transaction.')
+
+        ### get function arguments
+
+        self.print("Set the arguments to be passed to the chosen function.\n"
+                   "** Note! type 'SIG' when the signature of the tx creator is required.\n"
+                   "   more information st '-i'")
+        args_i_msg = "Set the arguments to be passed to the chosen function: {}\n" \
+                "** Note! if the signature of the tx creator is required (mostly, this argument\n" \
+                "is named 'sig s' or something similar), then it cannot be explicitly provided\n" \
+                "by you since it has to sign the entire transaction, which is not ready yet.. \n" \
+                "so in this case, just type in 'SIG'".format(func)
+        funcInputs = None
+        for func_d in abi:
+            if func_d["name"]==func:
+                funcInputs = func_d["inputs"]
+
+        funcArgs = []
+        for item in funcInputs:
+            v = self.parse_input(desc_line="{} {} = ".format(item["type"], item["name"]),
+                              default=None,
+                              choices=None,
+                              i_msg=args_i_msg)
+            if v == 'SIG':
+                v = "new SignatureTemplate(walletInfo.childKeyPair)"
+            funcArgs.append(v)
+
+        ### tx output
+        outputs = []
+        amounts = []
+        self.print("Type in the outputs of the transaction. Note that order matters.")
+        output_i_msg = ""   # todo ... order according to the constructor.. amounts satoshis
+        output_count = 0
+        while 'y'==self._y_n_question('would you like to add another output?', i_msg=output_i_msg):
+            out = self.parse_input(desc_line="output_{} = ".format(output_count),
+                              default=None,
+                              choices=None,
+                              i_msg=output_i_msg)
+            amount = self.parse_input(desc_line="amount_{} = ".format(output_count),
+                                   default=None,
+                                   choices=None,
+                                   i_msg=output_i_msg)
+            outputs.append(out)
+            amounts.append(amount)
+            output_count += 1
+
+        self.js_args['TX_FUNC'] = "await con.functions.{}({}){}.withHardcodedFee({}).send();''".format(func,
+                                                                                                       ', '.join(funcArgs),
+                                                                                                       ''.join([".to('{}', {})".format(t[0], t[1]) for t in zip(outputs, amounts)]),
+                                                                                                       minerFee)
+
+        self.js_args['MAIN'] = "use_contract();"
+        self.js_run()
+
+    def js_run(self):
+        js = js_bridge()
+        js.args = copy.deepcopy(self.js_args)
+        js.run()
 
 
 
