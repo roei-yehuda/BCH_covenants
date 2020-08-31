@@ -467,7 +467,6 @@ class create_contract_CLI(cov_gen_CLI):
         return cg
 
 
-
 class use_contract_CLI(cov_gen_CLI):
     """
     CLI for the second mode - instantiating and operation of a compiled contract
