@@ -4,6 +4,8 @@
     <list default="true" id="6c103c48-6bb0-4c29-9a45-9629b69255c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cli.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/covenant_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/covenant_generator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js_bridge_template" beforeDir="false" afterPath="$PROJECT_DIR$/js_bridge_template" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -13,7 +15,7 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/BCH_covenants$js_bridge.coverage" NAME="js_bridge Coverage Results" MODIFIED="1598766736503" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/BCH_covenants$CLI.coverage" NAME="CLI Coverage Results" MODIFIED="1598811611983" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/BCH_covenants$CLI.coverage" NAME="CLI Coverage Results" MODIFIED="1598821688654" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/BCH_covenants$conv_gen.coverage" NAME="conv_gen Coverage Results" MODIFIED="1598550914995" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
@@ -26,40 +28,40 @@
           <entry key="project.open.time.13" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.5" value="1" />
-          <entry key="project.open.time.7" value="1" />
+          <entry key="project.open.time.7" value="2" />
           <entry key="project.open.time.8" value="1" />
           <entry key="project.open.time.9" value="2" />
-          <entry key="project.opened" value="16" />
+          <entry key="project.opened" value="17" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="js_bridge_template" value="3" />
-          <entry key="py" value="17" />
+          <entry key="js_bridge_template" value="8" />
+          <entry key="py" value="20" />
           <entry key="spedn" value="2" />
           <entry key="ts" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="PLAIN_TEXT" value="5" />
-          <entry key="Python" value="17" />
+          <entry key="PLAIN_TEXT" value="10" />
+          <entry key="Python" value="20" />
           <entry key="TypeScript" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="1406" />
-          <entry key="js_bridge_template" value="7" />
-          <entry key="py" value="26649" />
+          <entry key="Python Console" value="1424" />
+          <entry key="js_bridge_template" value="12" />
+          <entry key="py" value="27407" />
           <entry key="spedn" value="70" />
           <entry key="ts" value="12" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="77" />
-          <entry key="Python" value="28055" />
+          <entry key="PLAIN_TEXT" value="82" />
+          <entry key="Python" value="28831" />
           <entry key="TypeScript" value="12" />
         </counts>
       </usages-collector>
@@ -75,27 +77,13 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/covenant_generator.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#662#671#0" expanded="true" />
-                <marker date="1598791084057" expanded="true" signature="9908:9913" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cli.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="367">
-              <caret line="386" column="26" selection-start-line="386" selection-start-column="26" selection-end-line="386" selection-end-column="26" />
+            <state relative-caret-position="152">
+              <caret line="433" lean-forward="true" selection-start-line="433" selection-end-line="433" />
               <folding>
                 <element signature="e#64#96#0" expanded="true" />
-                <marker date="1598811759049" expanded="true" signature="1689:4890" ph="..." />
-                <marker date="1598811759049" expanded="true" signature="5112:5244" ph="..." />
               </folding>
             </state>
           </provider>
@@ -104,8 +92,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js_bridge_template">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3287">
-              <caret line="173" selection-start-line="173" selection-end-line="173" />
+            <state relative-caret-position="672">
+              <caret line="273" lean-forward="true" selection-start-line="273" selection-end-line="273" />
             </state>
           </provider>
         </entry>
@@ -146,6 +134,9 @@
       <find>Rs</find>
       <find>i_text</find>
       <find>another</find>
+      <find>a new func</find>
+      <find>pragm</find>
+      <find>pragma</find>
     </findStrings>
     <replaceStrings>
       <replace>recipient</replace>
@@ -313,12 +304,12 @@
     <frame x="8" y="31" width="1920" height="1017" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49837133" visible="true" weight="0.24434876" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49837133" visible="true" weight="0.24811625" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.50162864" side_tool="true" weight="0.2497309" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32990867" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.46575344" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3413242" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.49657536" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -328,7 +319,7 @@
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.32990867" />
-      <window_info anchor="bottom" id="Python Console" order="12" weight="0.43493152" />
+      <window_info anchor="bottom" id="Python Console" order="12" visible="true" weight="0.15410958" />
       <window_info anchor="bottom" id="TypeScript" order="13" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -366,31 +357,37 @@
         </state>
       </provider>
     </entry>
+    <entry file="file:///usr/lib/python3/dist-packages/termcolor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="97">
+          <caret line="85" column="4" selection-start-line="85" selection-start-column="4" selection-end-line="85" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/covenant_generator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="178">
+          <caret line="322" column="18" selection-end-line="535" />
           <folding>
             <element signature="e#662#671#0" expanded="true" />
-            <marker date="1598791084057" expanded="true" signature="9908:9913" ph="..." />
+            <marker date="1598829223476" expanded="true" signature="9908:9913" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js_bridge_template">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3287">
-          <caret line="173" selection-start-line="173" selection-end-line="173" />
+        <state relative-caret-position="672">
+          <caret line="273" lean-forward="true" selection-start-line="273" selection-end-line="273" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cli.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="367">
-          <caret line="386" column="26" selection-start-line="386" selection-start-column="26" selection-end-line="386" selection-end-column="26" />
+        <state relative-caret-position="152">
+          <caret line="433" lean-forward="true" selection-start-line="433" selection-end-line="433" />
           <folding>
             <element signature="e#64#96#0" expanded="true" />
-            <marker date="1598811759049" expanded="true" signature="1689:4890" ph="..." />
-            <marker date="1598811759049" expanded="true" signature="5112:5244" ph="..." />
           </folding>
         </state>
       </provider>

@@ -1,26 +1,40 @@
 # this is the command line interface for our covenant generator
 from covenant_generator import *
-from termcolor import colored
 import copy
 import os
 import sys
 import re
 
+from termcolor import colored
+import platform
+
+if platform.platform().startswith('Windows'):
+    import colorama
+
+    colorama.init()
 
 # print colors:
 REG = 'white'
 ERR = 'red'
 IN = 'yellow'
-HIGHLIGHT = 'blue'
+HIGHLIGHT = 'cyan'
 
 
 class js_bridge():
 
     def __init__(self):
+        self.args = {}
+        self.reset_args()
+        self.js_template_path = 'js_bridge_template'
+        self.js_temp_code_path = '_temp_js_code.ts'
+
+    def reset_args(self):
         self.args = {
+            'DEBUG': 'false',
             'NETWORK': 'testnet',
             'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
-            'TESTNET_API': 'https://free-test.fullstack.cash/v3/',  # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
+            'TESTNET_API': 'https://free-test.fullstack.cash/v3/',
+        # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
             'W_JSON': 'wallet.json',
             'MNEMONIC': '',
             'CHILD_I': '0',
@@ -28,16 +42,15 @@ class js_bridge():
             'ARTIFACT_F': 'cov.json',
             'C_JSON': '_cov_info.json',
             'DO_COMPILE': 'true',
-            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',     # new ElectrumProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
+            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',
+        # new ElectrumNetworkProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
             'CONSTRUCTOR_ARGS': '',
-            'TX_FUNC': "''",  # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
+            'TX_FUNC': "''",
+        # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
             'MAIN': "console.log('Wassup??');"
         }
-        self.js_template_path = 'js_bridge_template'
-        self.js_temp_code_path = '_temp_js_code.ts'
 
     def run(self):
-
         with open(self.js_template_path, mode='r') as f:
             js_code = f.read()
 
@@ -47,12 +60,10 @@ class js_bridge():
         with open(self.js_temp_code_path, "w") as f:
             print(js_code, file=f)
 
-        # os.system("ts-node " + self.js_temp_code_path)
-
+        os.system("ts-node " + self.js_temp_code_path)
 
 
 class cov_gen_CLI():
-
     # restrictions info massages:
     rs_operators_i_msg = "Operator of a function is someone who is allowed to use (call) it.\n" \
                          "Their public key and signature will be verified upon calling the function.\n" \
@@ -80,10 +91,10 @@ class cov_gen_CLI():
                     "- 'min' vs 'max':\n" \
                     "  If min is defined, then the funds must be pulled after the TIME specified.\n" \
                     "  If max is defined, the funds must be pulled before the TIME specified."
-    rs_i_msg = "Operators restriction:\n" + utils().indent(rs_operators_i_msg) + "" \
-                + "Recipients restriction:\n" + utils().indent(rs_recipients_i_msg) + "" \
-                + "Amount restriction:\n" + utils().indent(rs_amount_i_msg) + "" \
-                + "Time restriction:\n" + utils().indent(rs_time_i_msg)
+    rs_i_msg = "Operators restriction:\n" + utils().indent(rs_operators_i_msg) + "\n" \
+               + "Recipients restriction:\n" + utils().indent(rs_recipients_i_msg) + "\n" \
+               + "Amount restriction:\n" + utils().indent(rs_amount_i_msg) + "\n" \
+               + "Time restriction:\n" + utils().indent(rs_time_i_msg)
     add_fn_i_msg = "A contract consists of functions. Each function is composed of restrictions,\n" \
                    " i.e. requirements, which must all be met in order to access the funds stored\n" \
                    "in the contract."
@@ -94,8 +105,7 @@ class cov_gen_CLI():
         self.globals = ['-i', '-h', '-exit', '-clear']
         self.run()
 
-
-    def print(self, s: str, c: str=None, end="\n"):
+    def print(self, s: str, c: str = None, end="\n"):
         if c is not None:
             print(colored(s, c), end=end)
         else:
@@ -104,14 +114,15 @@ class cov_gen_CLI():
     def run(self):
 
         # variables for the generation of cov_gen
-        self.cov_init_args = copy.deepcopy(cov_gen.cov_init_kwargs_d)  # {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''}
+        self.cov_init_args = copy.deepcopy(
+            cov_gen.cov_init_kwargs_d)  # {'contract_name':'cov', 'cashScript_pragma':'0.5.0', 'miner_fee':1000, 'intro_comment':''}
         self.cov_funcs_list = []
 
         def print_intro():
 
-            self.print('\n\n{}'.format('*'*50), HIGHLIGHT)
+            self.print('\n\n{}'.format('*' * 50), HIGHLIGHT)
             self.print("Welcome to the BCH Covenant Generator!", HIGHLIGHT)
-            self.print('{}\n'.format('*'*50), HIGHLIGHT)
+            self.print('{}\n'.format('*' * 50), HIGHLIGHT)
 
             intro_msg = "This program facilitates the creation, deployment and use of\n" \
                         "smart contracts and covenants in BCH.\n" \
@@ -140,9 +151,9 @@ class cov_gen_CLI():
 
             createContract = '1' == self.parse_input(desc_line=desc_line,
                                                      default=None,
-                                                     choices=["1","2"],
+                                                     choices=["1", "2"],
                                                      i_msg=intro_msg_i,
-                                                     show_choice= False)
+                                                     show_choice=False)
 
             return createContract
 
@@ -163,10 +174,7 @@ class cov_gen_CLI():
                    '\tEach function includes at least one restriction (requirement).\n' +
                    '\tIn order to use a contract (e.g. spend money from it), one interacts\n' +
                    '\twith one of its functions and has to meet all of its restrictions.')
-        add_fn_i_msg = "A contract consists of functions. Each function is composed of restrictions,\n" \
-                       " i.e. requirements, which must all be met in order to access the funds stored\n" \
-                       "in the contract."
-        while self._y_n_question('would you like to add another function?', i_msg=self.add_fn_i_msg) == 'y':
+        while self._y_n_question('would you like to add a new function?', i_msg=self.add_fn_i_msg) == 'y':
             self.add_fn()
         self.print('\n', REG)
         self.generate_cov()
@@ -179,17 +187,17 @@ class cov_gen_CLI():
         # {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''}
         self.cov_init_args['contract_name'] = self.parse_input(desc_line='contract name (wo spaces)',
                                                                tp=str,
-                                                               default='cov',
+                                                               default=self.cov_init_args['contract_name'],
                                                                choices=None,
                                                                i_msg='Choose a name for your contract. Do not use spaces or tabs etc.')
         self.cov_init_args['cashScript_pragma'] = self.parse_input(desc_line='cashScript pragma',
                                                                    tp=str,
-                                                                   default='0.4.0',
+                                                                   default=self.cov_init_args['cashScript_pragma'],
                                                                    choices=None,
                                                                    i_msg='cashScript version with which the contract will be written and compiled.')
         self.cov_init_args['miner_fee'] = self.parse_input(desc_line='miner fee',
                                                            tp=str,
-                                                           default=1000,
+                                                           default=self.cov_init_args['miner_fee'],
                                                            choices=None,
                                                            i_msg='miner fee (in satoshis) for deployment of the contract on the blockchain and \n'
                                                                  'for transactions interacting with it - this will be hardcoded to the script in some cases.\n'
@@ -209,8 +217,11 @@ class cov_gen_CLI():
 
         self.print("{q}{deft}{choice}{sep}".format(q=desc_line,
                                                    deft='' if default is None else ' [{}]'.format(str(default)),
-                                                   choice='' if (choices is None or not show_choice) else " {" + ', '.join(choices) + "}",
-                                                   sep=' ' if desc_line=='' or desc_line.endswith(("?", "\n", "-")) else ': '), IN, end)
+                                                   choice='' if (
+                                                           choices is None or not show_choice) else " {" + ', '.join(
+                                                       choices) + "}",
+                                                   sep=' ' if desc_line == '' or desc_line.endswith(
+                                                       ("?", "\n", "-")) else ': '), IN, end)
         my_input = input().strip()
 
         # help and global functions
@@ -240,16 +251,16 @@ class cov_gen_CLI():
                     return my_input_in_tp
                 else:
                     self.print('Oops! wrong input, your options are {}:'.format(str(choices)), ERR)
-                    self.parse_input(desc_line, tp, default, choices, i_msg, end, show_choice)
+                    return self.parse_input(desc_line, tp, default, choices, i_msg, end, show_choice)
             return my_input_in_tp
         except ValueError:
             self.print('Oops! {} is not of type {}, try again:'.format(str(my_input), str(tp)), ERR)
-            self.parse_input(desc_line, tp, default, choices, i_msg, end, show_choice)
+            return self.parse_input(desc_line, tp, default, choices, i_msg, end, show_choice)
 
     def _h(self):
         """ help information global """
         self.print(' -h: help\n-exit: exit and close\n-clear: clear all the functions without exiting\n'
-                           '-i information about this specific function')
+                   '-i information about this specific function')
 
     def _exit(self):
         """ exit the program """
@@ -274,7 +285,6 @@ class cov_gen_CLI():
                                     i_msg=self.rs_operators_i_msg)
         return r_d
 
-
     def fn_rs_recipients(self):
         """ restrict recipients """
         r_d = copy.deepcopy(cov_fn.restrict_recipients_kwargs_d)
@@ -285,15 +295,15 @@ class cov_gen_CLI():
         r_d['n_SH'] = self.parse_input(desc_line='number of desired P2SH recipients (P2SH)', tp=int, default=0,
                                        i_msg=self.rs_recipients_i_msg)
 
-        # todo: have roei check:
-        r_d['require_recipient_sig'] = 'y' == self._y_n_question('would you like to require a signature from the recipient(s)?',
-                                                                 i_msg=self.rs_recipients_i_msg)
-        r_d['include_all'] = self.parse_input(desc_line="Would you like to allow any of the recipients on the tx's output,\nor demand all of them?",
-                                              tp=int, default=['any'], choices=['any', 'all'],
-                                              i_msg=self.rs_recipients_i_msg)
+        r_d['require_recipient_sig'] = 'y' == self._y_n_question(
+            'would you like to require a signature from the recipient(s)?',
+            i_msg=self.rs_recipients_i_msg)
+        r_d['include_all'] = 'all' == self.parse_input(
+            desc_line="Would you like the tx's output to include any of the recipients or all of them?",
+            tp=str, default='any', choices=['any', 'all'],
+            i_msg=self.rs_recipients_i_msg)
 
         return r_d
-
 
     def fn_rs_amount(self):
         """ restrict the amount that can be pulled in a transaction """
@@ -301,17 +311,19 @@ class cov_gen_CLI():
         _tx = "It is possible to restrict the amount per transaction or per recipient or both"
         self.print(_tx, REG)
 
-        def limit_amount_y_n(whom:str):
-            return self._y_n_question('would you like to limit the amount per {}?'.format(whom), i_msg=self.rs_amount_i_msg)
+        def limit_amount_y_n(whom: str):
+            return self._y_n_question('would you like to limit the amount per {}?'.format(whom),
+                                      i_msg=self.rs_amount_i_msg)
 
         if limit_amount_y_n('transaction') == 'y':
-            r_d['max_amount_per_tx'] = self.parse_input(desc_line='amount limit per transaction (positive natural number, in satoshis)', tp=int, default=None,
-                                                        i_msg=self.rs_amount_i_msg)
+            r_d['max_amount_per_tx'] = self.parse_input(
+                desc_line='amount limit per transaction (positive natural number, in satoshis)', tp=int, default=None,
+                i_msg=self.rs_amount_i_msg)
         if limit_amount_y_n('recipient') == 'y':
-            r_d['max_amount_per_recipient'] = self.parse_input(desc_line='amount limit per recipient (positive natural number, in satoshis)', tp=int, default=None,
-                                                               i_msg=self.rs_amount_i_msg)
+            r_d['max_amount_per_recipient'] = self.parse_input(
+                desc_line='amount limit per recipient (positive natural number, in satoshis)', tp=int, default=None,
+                i_msg=self.rs_amount_i_msg)
         return r_d
-
 
     def fn_rs_time(self):
         """ create a time window for cancellation """
@@ -321,21 +333,27 @@ class cov_gen_CLI():
         self.print(_tx, REG)
 
         def pick_min_max():
-            _min = self._y_n_question('would you like to add a minimum time limitation?', i_msg=self.rs_time_i_msg) == 'y'
-            _max = self._y_n_question('would you like to add a maximum time limitation?', i_msg=self.rs_time_i_msg) == 'y'
+            _min = self._y_n_question('would you like to add a minimum time limitation?',
+                                      i_msg=self.rs_time_i_msg) == 'y'
+            _max = self._y_n_question('would you like to add a maximum time limitation?',
+                                      i_msg=self.rs_time_i_msg) == 'y'
             return _min, _max
 
         _min, _max = pick_min_max()
-        while not(_min) and not(_max):
+        while not (_min) and not (_max):
             self.print('You must pick at least one min or max option', ERR)
             _min, _max = pick_min_max()
 
         def insert_to_rd_min_mex(min_max: str):
-            time_stamp = self.parse_input(desc_line='pick a unit of time for {} time limit'.format(min_max), tp=str, default=None,
+            time_stamp = self.parse_input(desc_line='pick a unit of time for {} time limit'.format(min_max), tp=str,
+                                          default=None,
                                           choices=['seconds', 'minutes', 'hours', 'days', 'weeks'],
-                                          i_msg='write down one of the choices for a {} time reference.\nFurther info:\n{}'.format(min_max, self.rs_time_i_msg))
-            time_num = self.parse_input(desc_line='how many {} would you like?'.format(time_stamp), tp=int, default=None,
-                                        i_msg='enter a number of {} for {} time limit, must be an integer.\nFurther info:\n{}'.format(time_stamp, min_max, self.rs_time_i_msg))
+                                          i_msg='write down one of the choices for a {} time reference.\nFurther info:\n{}'.format(
+                                              min_max, self.rs_time_i_msg))
+            time_num = self.parse_input(desc_line='how many {} would you like?'.format(time_stamp), tp=int,
+                                        default=None,
+                                        i_msg='enter a number of {} for {} time limit, must be an integer.\nFurther info:\n{}'.format(
+                                            time_stamp, min_max, self.rs_time_i_msg))
             return "{} {}".format(time_stamp, str(time_num))
 
         if _min:
@@ -344,15 +362,15 @@ class cov_gen_CLI():
             r_d['max'] = insert_to_rd_min_mex(min_max='max')
 
         r_d_typ_lim = self.parse_input(desc_line='time limit type', tp=str, default=None, choices=['time', 'age'],
-                                       i_msg='pick a type of time limitation, time - absolute, age - relative.\nFurther info:\n{}'.format(self.rs_time_i_msg))
+                                       i_msg='pick a type of time limitation, time - absolute, age - relative.\nFurther info:\n{}'.format(
+                                           self.rs_time_i_msg))
         r_d['{}_limit'.format(r_d_typ_lim)] = True
         return r_d
-
 
     def add_fn(self):
         fn_name = self.parse_input(desc_line='function name', tp=str, default=None,
                                    i_msg='write a name for your function (again - wo spaces)) and then click enter')
-        self.print("{} new function: {}".format('-'*20, fn_name), HIGHLIGHT)
+        self.print("{} new function: {}".format('-' * 20, fn_name), HIGHLIGHT)
         fn_desc = self.parse_input(desc_line='function description (optional)', tp=str, default='',
                                    i_msg="write a description for your function.\n" +
                                          "This will appear right after the function's signature line")
@@ -361,7 +379,8 @@ class cov_gen_CLI():
 
         def add_restriction():
             self.print('Possible restrictions are: operators | recipients | amount | time')
-            r = self.parse_input(desc_line='which restriction would you like to apply?', tp=str, default=None, choices=['o', 'r', 'a', 't'],
+            r = self.parse_input(desc_line='which restriction would you like to apply?', tp=str, default=None,
+                                 choices=['o', 'r', 'a', 't'],
                                  i_msg=self.rs_i_msg)
             if r == 'o':
                 r = 'operators'
@@ -379,7 +398,7 @@ class cov_gen_CLI():
             fn_restrictions.append((r, r_args_d))
 
         # add restrictions in a while loop
-        while self._y_n_question('would you like to add another restriction?', i_msg=self.add_rs_i_msg) == 'y':
+        while self._y_n_question('would you like to add a new restriction?', i_msg=self.add_rs_i_msg) == 'y':
             add_restriction()
 
         self.cov_funcs_list.append((fn_name, fn_desc, fn_restrictions))
@@ -389,15 +408,96 @@ class cov_gen_CLI():
     def generate_cov(self):
         cg = cov_gen(**self.cov_init_args)
         cg.build_from_fn_list(self.cov_funcs_list)
-        print(cg.get_script())
+        self.print("{} final script: {}".format('-' * 20, '-' * 20), HIGHLIGHT)
+        self.print(cg.get_script())
+        save_i_msg = "A cashScript smart contract is saved as a '.cash' file. A descriptive artifact\n" \
+                     "file, which includes the compiled code, is saved as a '.json' file."
+
+        cash_f_def = os.path.join(os.getcwd(), 'contract.cash')
+        json_f_def = os.path.join(os.getcwd(), 'contract.json')
+        cash_f = self.parse_input(desc_line='choose location for the smart contract file',
+                                  default=cash_f_def,
+                                  i_msg=save_i_msg)
+        json_f = self.parse_input(desc_line='choose location for the smart contract file',
+                                  default=json_f_def,
+                                  i_msg=save_i_msg)
+        cg.compile_script(cash_f, json_f)
+        self.print("{}\nFiles for the smart contract were successfully saved at:\n{}\n{}\nGoodbye :)".format('-' * 20,
+                                                                                                             cash_f,
+                                                                                                             json_f),
+                   HIGHLIGHT)
         return cg
 
 
+def test_js():
+    j = js_bridge()
 
+    # default:
+    if 0:
+        j.args = {
+            'DEBUG': 'true',
+            'NETWORK': 'testnet',
+            'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
+            'TESTNET_API': 'https://free-test.fullstack.cash/v3/',
+            # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
+            'W_JSON': 'wallet.json',
+            'MNEMONIC': '',
+            'CHILD_I': '0',
+            'CASH_F': 'cov.cash',
+            'ARTIFACT_F': 'cov.json',
+            'C_JSON': '_cov_info.json',
+            'DO_COMPILE': 'true',
+            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',
+            # new ElectrumNetworkProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
+            'CONSTRUCTOR_ARGS': '',
+            'TX_FUNC': "''",
+            # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
+            'MAIN': "console.log('Wassup??');"
+        }
+
+    # get wallet:
+    if 0:
+        j.args = {
+            'DEBUG': 'true',
+            'NETWORK': 'testnet',
+            'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
+            'TESTNET_API': 'https://free-test.fullstack.cash/v3/',
+            'W_JSON': 'wallet_C.json',
+            'MNEMONIC': '',
+            'CHILD_I': '0',
+            'CASH_F': 'cov.cash',
+            'ARTIFACT_F': 'cov.json',
+            'C_JSON': '_cov_info.json',
+            'DO_COMPILE': 'true',
+            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',
+            'CONSTRUCTOR_ARGS': '',
+            'TX_FUNC': "''",
+            'MAIN': "get_wallet_info();"
+        }
+
+    if 1:
+        j.args = {
+            'DEBUG': 'true',
+            'NETWORK': 'testnet',
+            'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
+            'TESTNET_API': 'https://free-test.fullstack.cash/v3/',
+            'W_JSON': 'wallet_C.json',
+            'MNEMONIC': '',
+            'CHILD_I': '0',
+            'CASH_F': 'cov.cash',
+            'ARTIFACT_F': 'cov.json',
+            'C_JSON': '_cov_info.json',
+            'DO_COMPILE': 'true',
+            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',
+            'CONSTRUCTOR_ARGS': 'walletInfo.childPKH',
+            'TX_FUNC': "''",
+            # 'MAIN': "init_contract();"
+            'MAIN': "init_contract();\nprint_contract_info();"
+        }
+
+    j.run()
 
 
 if __name__ == '__main__':
-    # j = js_bridge()
-    # j.run()
-
-    cov_gen_CLI()
+    test_js()
+    # cov_gen_CLI()

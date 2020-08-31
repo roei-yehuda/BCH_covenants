@@ -320,7 +320,7 @@ class cov_gen():
     Once completed, a generated script can be saved to file and even be compiled by cashc.
     """
 
-    cov_init_kwargs_d = {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''}
+    cov_init_kwargs_d = {'contract_name':'cov', 'cashScript_pragma':'0.5.0', 'miner_fee':1000, 'intro_comment':''}
     def __init__(self, contract_name='cov', cashScript_pragma='0.4.0', miner_fee=1000, intro_comment=''):
         """
         Initializing a cov_gen.
