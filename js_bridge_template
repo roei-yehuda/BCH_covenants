@@ -93,13 +93,15 @@ async function get_wallet_info(mn?:string) {
 	const hdNode = bitbox.HDNode.fromSeed(rootSeed, NETWORK);	// wallet
 	const childNode = bitbox.HDNode.derive(hdNode, child_i);
 	const childKeyPair = bitbox.HDNode.toKeyPair(childNode);	// alice
-	const childPK = bitbox.ECPair.toPublicKey(childKeyPair);	// alicePk
+	const childPK = bitbox.ECPair.toPublicKey(childKeyPair).toString('hex');	// alicePk
 	const childPKH = cryptoHash('hash160', childPK).toString('hex');	// alicePkH
 
 	if (debug) {
-		console.log('in get_wallet_info:');
-		console.log(mnemonic);
-		console.log(childPKH);
+		console.log('\nin get_wallet_info:');
+		console.log("mnemonic " + mnemonic);
+		console.log("childKeyPair " + childKeyPair);
+		console.log("childPK " + childPK);
+		console.log("childPKH " + childPKH);
 	}
 
 	const walletInfo = {
@@ -120,27 +122,65 @@ async function get_wallet_info(mn?:string) {
 
 }
 
+
+async function get_contract(){
+	// var con;
+	const artifact = CashCompiler.compileFile(cash_f);
+	const provider = ###NET_PROVIDER###;
+
+	// in case no explicit CONSTRUCTOR_ARGS were given, let's try to get them from con_info_json_f
+	let input_args_str = '###CONSTRUCTOR_ARGS###';
+	let constructorArgsList = [];
+	if (input_args_str==='') {
+		const conInfo = await load_contract_info();
+		constructorArgsList = conInfo.constructor_args;
+	} else {
+		// const constructorArgsList = [###CONSTRUCTOR_ARGS###];
+		constructorArgsList = input_args_str.split(', ');	// split returns array, might need to turn it into list
+	}
+
+	const con = new Contract(artifact, constructorArgsList, provider);
+
+	return con;
+}
+
+
 // @ts-ignore
 async function init_contract() {
 	/*
-	This function creates and returns a new contract
+	same as get_contract but with writing to json
 	*/
 
-	const walletInfo = await get_wallet_info();
+	// const walletInfo = await get_wallet_info();
 
 	const artifact = CashCompiler.compileFile(cash_f);
 	const provider = ###NET_PROVIDER###;
-	const con = new Contract(artifact, [###CONSTRUCTOR_ARGS###], provider);
+
+	// in case no explicit CONSTRUCTOR_ARGS were given, let's try to get them from con_info_json_f
+	let input_args_str = '###CONSTRUCTOR_ARGS###';
+	let constructorArgsList = [];
+	if (input_args_str==='') {
+		//console.log('constructorArgsList from load_contract_info');
+		const conInfo = await load_contract_info();
+		constructorArgsList = conInfo.constructor_args;
+	} else {
+		//console.log('constructorArgsList from input_args_str.split(');
+		constructorArgsList = input_args_str.split(', ');
+	}
+	//console.log(constructorArgsList);
+
+	const con = new Contract(artifact, constructorArgsList, provider);
 
 	if (debug) {
-		console.log('in init_contract:');
+		console.log('\nin init_contract:');
 		console.log(con.address);
 	}
+
 
 	// Write out the basic information into con_info_json_f
 	const outObj = {
 		address: con.address,
-		constructor_args: [###CONSTRUCTOR_ARGS###],
+		constructor_args: constructorArgsList,
 		network_provider_str: '###NET_PROVIDER###'
 	};
 	fs.writeFile(con_info_json_f, JSON.stringify(outObj, null, 2), function (err) {
@@ -198,15 +238,13 @@ async function print_contract_info() {
 
 	const walletInfo = await get_wallet_info();
 
-	const artifact = CashCompiler.compileFile(cash_f);
-	const provider = ###NET_PROVIDER###;
-	const con = new Contract(artifact, [###CONSTRUCTOR_ARGS###], provider);
+	const con = await get_contract();
 
-	console.log('contract info:');
+	console.log('\ncontract info:');
 	console.log('address: ' + con.address);
 	console.log('opcount: ' + con.opcount);
 	console.log('bytesize: ' + con.bytesize);
-	// const contractBalance = await con.getBalance();
+	// var contractBalance = await con.getBalance();
 	let contractBalance = "";
 	try {
 		contractBalance = await con.getBalance();
@@ -231,40 +269,29 @@ async function use_contract() {
 	Use a contract by calling one of its functions
 	*/
 
-	// creator of tx:
 	const walletInfo = await get_wallet_info();
 
-	/*
-	// creator of tx:
-	if (mnemonic === '') {
-		const walletInfo = await load_wallet_info();
-		mnemonic = walletInfo.mnemonic;
-	}
-	const rootSeed = bitbox.Mnemonic.toSeed(mnemonic);
-	const hdNode = bitbox.HDNode.fromSeed(rootSeed, NETWORK);	// wallet
-	const childNode = bitbox.HDNode.derive(hdNode, child_i);
-	const childKeyPair = bitbox.HDNode.toKeyPair(childNode);	// alice
-	const childPK = bitbox.ECPair.toPublicKey(childKeyPair);	// alicePk
-	*/
+	const con = await get_contract();
 
-
-	/*
-	// creator of tx:
-	const walletInfo = await load_wallet_info();
-	const childKeyPair = walletInfo.childKeyPair;	// alice
-	const childPK = walletInfo.childPK;	// alicePk
-	*/
-
-	// create contract:
-	const artifact = CashCompiler.compileFile(cash_f);
-	const provider = ###NET_PROVIDER###;
-	const con = new Contract(artifact, [###CONSTRUCTOR_ARGS###], provider);
+	console.log('');
 
 	// build and send tx:
-	const txDetails = ###TX_FUNC###;
+	var tx;
+	try {
+		tx = ###TX_FUNC###
+		const meepStr = await tx.meep();
+		console.log('meepStr:\n' + meepStr);
+		tx.send();
+	} catch (err){
+		console.log('Tx failed.');
+	}
+
+	if (tx === ''){
+		tx = '-';
+	}
 
 	console.log('Tx details:');
-	console.log(txDetails);
+	console.log(tx);
 
 }
 

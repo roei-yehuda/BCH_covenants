@@ -19,7 +19,6 @@ ERR = 'red'
 IN = 'yellow'
 HIGHLIGHT = 'cyan'
 
-
 debug = True
 
 
@@ -37,7 +36,7 @@ class js_bridge():
             'NETWORK': 'testnet',
             'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
             'TESTNET_API': 'https://free-test.fullstack.cash/v3/',
-        # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
+            # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
             'W_JSON': 'wallet.json',
             'MNEMONIC': '',
             'CHILD_I': '0',
@@ -46,10 +45,10 @@ class js_bridge():
             'C_JSON': '_cov_info.json',
             'DO_COMPILE': 'true',
             'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',
-        # new ElectrumNetworkProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
+            # new ElectrumNetworkProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
             'CONSTRUCTOR_ARGS': '',
             'TX_FUNC': "''",
-        # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
+            # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
             'MAIN': "console.log('Wassup??');"
         }
 
@@ -115,13 +114,7 @@ class cov_gen_CLI():
 
     def run(self):
 
-        # # variables for the generation of cov_gen
-        # self.cov_init_args = copy.deepcopy(
-        #     cov_gen.cov_init_kwargs_d)  # {'contract_name':'cov', 'cashScript_pragma':'0.5.0', 'miner_fee':1000, 'intro_comment':''}
-        # self.cov_funcs_list = []
-
         def print_intro():
-
             self.print('\n\n{}'.format('*' * 50), HIGHLIGHT)
             self.print("Welcome to the BCH Covenant Generator!", HIGHLIGHT)
             self.print('{}\n'.format('*' * 50), HIGHLIGHT)
@@ -146,19 +139,18 @@ class cov_gen_CLI():
             print(colored('-h', 'yellow'), end='')
             print(colored(c, REG))
 
-
         print_intro()
 
         q = "First things first, what are you here for?\n" \
-                    "1) Create and compile a new smart contract\n" \
-                    "2) Initialize or use an existing contract\n"
-        intro_msg_i = "intro_msg_i" # todo
+            "1) Create and compile a new smart contract\n" \
+            "2) Initialize or use an existing contract\n"
+        intro_msg_i = "intro_msg_i"  # todo
 
         do_create_contract = '1' == self.parse_input(desc_line=q,
-                                                 default=None,
-                                                 choices=["1", "2"],
-                                                 i_msg=intro_msg_i,
-                                                 show_choice=False)
+                                                     default=None,
+                                                     choices=["1", "2"],
+                                                     i_msg=intro_msg_i,
+                                                     show_choice=False)
 
         return do_create_contract
 
@@ -423,15 +415,7 @@ class cov_gen_CLI():
     #     return cg
 
 
-    def run_use_contract(self):
-        pass
-
-
-
-
-
 class create_contract_CLI(cov_gen_CLI):
-
     # restrictions info massages:
     rs_operators_i_msg = "Operator of a function is someone who is allowed to use (call) it.\n" \
                          "Their public key and signature will be checked upon calling the function.\n" \
@@ -474,7 +458,8 @@ class create_contract_CLI(cov_gen_CLI):
     def run(self):
 
         # variables for the generation of cov_gen
-        self.cov_init_args = copy.deepcopy(cov_gen.cov_init_kwargs_d)  # {'contract_name':'cov', 'cashScript_pragma':'0.5.0', 'miner_fee':1000, 'intro_comment':''}
+        self.cov_init_args = copy.deepcopy(
+            cov_gen.cov_init_kwargs_d)  # {'contract_name':'cov', 'cashScript_pragma':'0.5.0', 'miner_fee':1000, 'intro_comment':''}
         self.cov_funcs_list = []
 
         self.set_init()
@@ -490,7 +475,6 @@ class create_contract_CLI(cov_gen_CLI):
         self.generate_cov()
         # self.print("Exiting. Goodbye", HIGHLIGHT)
         self._exit()
-
 
     def set_init(self):
         self.print('Upon creating a new contract, set some basic parameters first:')
@@ -658,7 +642,6 @@ class create_contract_CLI(cov_gen_CLI):
                      "file, which includes the compiled code, is saved as a '.json' file."
 
         if self._y_n_question('would you like compile and save it?', i_msg=save_i_msg) == 'y':
-
             cash_f_def = os.path.join(os.getcwd(), 'contract.cash')
             json_f_def = os.path.join(os.getcwd(), 'contract.json')
             cash_f = self.parse_input(desc_line='choose location for the smart contract file',
@@ -668,16 +651,12 @@ class create_contract_CLI(cov_gen_CLI):
                                       default=json_f_def,
                                       i_msg=save_i_msg)
             cg.compile_script(cash_f, json_f)
-            self.print("{}\nFiles for the smart contract were successfully saved at:\n{}\n{}\nGoodbye :)".format('-' * 20,
-                                                                                                                 cash_f,
-                                                                                                                 json_f),
-                       HIGHLIGHT)
+            self.print(
+                "{}\nFiles for the smart contract were successfully saved at:\n{}\n{}\nGoodbye :)".format('-' * 20,
+                                                                                                          cash_f,
+                                                                                                          json_f),
+                HIGHLIGHT)
         return cg
-
-
-
-
-
 
 
 class use_contract_CLI(cov_gen_CLI):
@@ -685,7 +664,6 @@ class use_contract_CLI(cov_gen_CLI):
     def __init__(self):
         super().__init__()
         self.js_args = copy.deepcopy(js_bridge().args)
-
 
     def run(self):
 
@@ -695,26 +673,31 @@ class use_contract_CLI(cov_gen_CLI):
 
         self.set_constructor()
 
-        self.print("Finaly we can get to business.", HIGHLIGHT)
+        self.print("Finaly we can get down to business.", HIGHLIGHT)
         self.print("\tFrom this point on the CLI will ask you to choose an action, if you wish\n"
                    "\tto finish up just type '-exit'")
 
-        action = self.parse_input(desc_line="would you like to instantiate (init) a contract, or operate an \ninstantiated one (use)?",
-                                                  default=None,
-                                                  choices=['init', 'use'],
-                                                  i_msg='Choose an action. You can always type in -h for general instructions.')
+        action = self.parse_input(
+            desc_line="would you like to instantiate a contract (init), or operate an \ninstantiated one (use)?",
+            default=None,
+            choices=['init', 'use'],
+            i_msg='Choose an action. You can always type in -h for general instructions.')
 
         while action is not None:
             if action == 'init':
                 self.init_contract()
             else:
                 self.use_contract()
-
+            action = self.parse_input(
+                desc_line="would you like to instantiate a contract (init), or operate an \ninstantiated one (use)?",
+                default=None,
+                choices=['init', 'use'],
+                i_msg='Choose an action. You can always type in -h for general instructions.')
 
     def set_init(self):
         self.print('Before we start interacting with the contract, we need to set some basics first.')
         self.print("Currently, all your parameters are set to default:", IN)
-        self.print(utils.indent("\n".join(["{} = {}".format(k, self.js_args[k]) for k in self.js_args.keys()])))
+        self.print(utils().indent("\n".join(["{} = {}".format(k, self.js_args[k]) for k in self.js_args.keys()])))
 
         if 'n' == self._y_n_question('would you like to change any of them?'):
             return
@@ -743,20 +726,20 @@ class use_contract_CLI(cov_gen_CLI):
         self.js_args['DEBUG'] = 'true' if debug else 'false'
 
         self.js_args['NETWORK'] = self.parse_input(desc_line='choose BCH network',
-                                            default=self.js_args['NETWORK'],
-                                            choices=['testnet', 'mainnet'],
-                                            i_msg='Basically, mainnet uses real BCH and testnet is a simulation')
+                                                   default=self.js_args['NETWORK'],
+                                                   choices=['testnet', 'mainnet'],
+                                                   i_msg='Basically, mainnet uses real BCH and testnet is a simulation')
 
         if self.js_args['NETWORK'] == 'mainnet':
             self.js_args['MAINNET_API'] = self.parse_input(desc_line='set rest url for the network',
-                                                default=self.js_args['MAINNET_API'],
-                                                choices=None,
-                                                i_msg='')
+                                                           default=self.js_args['MAINNET_API'],
+                                                           choices=None,
+                                                           i_msg='')
         else:
             self.js_args['TESTNET_API'] = self.parse_input(desc_line='set rest url for the network',
-                                                default=self.js_args['TESTNET_API'],
-                                                choices=None,
-                                                i_msg='')
+                                                           default=self.js_args['TESTNET_API'],
+                                                           choices=None,
+                                                           i_msg='')
 
         cash_f_i_msg = "a BCH smart contract written in cashScript is saved in source code in a cash file.\n" \
                        "After being compiled by cashc, an artifact file is saved in a json file. \n" \
@@ -766,11 +749,11 @@ class use_contract_CLI(cov_gen_CLI):
                                                   default=self.js_args['CASH_F'],
                                                   choices=None,
                                                   i_msg=cash_f_i_msg)
-        self.js_args['DO_COMPILE'] = 'true' if self.js_args['CASH_F']!='' else 'false'
+        self.js_args['DO_COMPILE'] = 'true' if self.js_args['CASH_F'] != '' else 'false'
         self.js_args['ARTIFACT_F'] = self.parse_input(desc_line="location of contract's artifact",
-                                                  default=self.js_args['ARTIFACT_F'],
-                                                  choices=None,
-                                                  i_msg=cash_f_i_msg)
+                                                      default=self.js_args['ARTIFACT_F'],
+                                                      choices=None,
+                                                      i_msg=cash_f_i_msg)
 
         c_json_i_msg = "After instantiation and deployment to the BCH blockchain, we save a json file\n" \
                        "with the contract's info, such as its address and constructor arguments."
@@ -788,30 +771,29 @@ class use_contract_CLI(cov_gen_CLI):
                        "Or, alternatively i.e. instead of all of the above, the json file has to include:\n" \
                        "- mnemonic (12 words string)"
         self.js_args['W_JSON'] = self.parse_input(desc_line="set location for the wallet's json file",
-                                            default=self.js_args['W_JSON'],
-                                            choices=None,
-                                            i_msg=w_json_i_msg)
+                                                  default=self.js_args['W_JSON'],
+                                                  choices=None,
+                                                  i_msg=w_json_i_msg)
 
         ### more advanced parameters
         mnemonic_i_msg = "The wallet's mnemonic - a (private!) 12 words string"
         child_i_i_msg = "The wallet's (HDnode) child_i - its derived path index associated with the cashAddress"
         net_provider_i_msg = "The network's (mainnet/testnet) provider, syntax should be according to https://cashscript.org/docs/sdk/instantiation"
-        if 'y'==self._y_n_question('would you like to set the following items as well (more advanced):\n- mnemonic\n- childNode indexi\n- network provider',
-                                   i_msg="{}\n{}\n{}".format(mnemonic_i_msg, child_i_i_msg, net_provider_i_msg)):
+        if 'y' == self._y_n_question(
+                'would you like to set the following items as well (more advanced):\n- mnemonic\n- childNode indexi\n- network provider',
+                i_msg="{}\n{}\n{}".format(mnemonic_i_msg, child_i_i_msg, net_provider_i_msg)):
             self.js_args['MNEMONIC'] = self.parse_input(desc_line="wallet's mnemonic (optional)",
-                                                default=self.js_args['MNEMONIC'],
-                                                choices=None,
-                                                i_msg=mnemonic_i_msg)
+                                                        default=self.js_args['MNEMONIC'],
+                                                        choices=None,
+                                                        i_msg=mnemonic_i_msg)
             self.js_args['CHILD_I'] = self.parse_input(desc_line="wallet's childNode index",
-                                                        default=self.js_args['CHILD_I'],
-                                                        choices=None,
-                                                        i_msg=child_i_i_msg + '\nThis should be an index (int from 0 to 9 is preferable)')
+                                                       default=self.js_args['CHILD_I'],
+                                                       choices=None,
+                                                       i_msg=child_i_i_msg + '\nThis should be an index (int from 0 to 9 is preferable)')
             self.js_args['NET_PROVIDER'] = self.parse_input(desc_line="The network's (mainnet/testnet) provider",
-                                                        default=self.js_args['NET_PROVIDER'],
-                                                        choices=None,
-                                                        i_msg=net_provider_i_msg)
-
-
+                                                            default=self.js_args['NET_PROVIDER'],
+                                                            choices=None,
+                                                            i_msg=net_provider_i_msg)
 
         # self.js_args[''] = self.parse_input(desc_line="",
         #                                     default=self.js_args[''],
@@ -835,7 +817,7 @@ class use_contract_CLI(cov_gen_CLI):
         if os.path.exists(self.js_args['C_JSON']):
             with open(self.js_args['C_JSON']) as f:
                 c_data = json.load(f)
-            constructorValues = c_data['constructorInputs']
+            constructorValues = c_data['constructor_args']
 
         if constructorInputs is not None:
             if constructorValues is not None:
@@ -844,36 +826,38 @@ class use_contract_CLI(cov_gen_CLI):
                                                                constructorInputs[i]["name"],
                                                                constructorValues[i])
             else:
-                cons_args = {a["name"]:(a["type"], a["name"], '') for a in constructorInputs}
+                cons_args = {a["name"]: (a["type"], a["name"], '') for a in constructorInputs}
 
-        cons_args_in_str = lambda: '\n'.join(["{} {} = {}".format(cons_args[k][0], cons_args[k][1], cons_args[k][2]) for k in cons_args.keys()])
-
+        cons_args_in_str = lambda: '\n'.join(
+            ["{} {} = {}".format(cons_args[k][0], cons_args[k][1], cons_args[k][2]) for k in cons_args.keys()])
 
         self.print("check constructor parameters:\n"
                    "\tIn order to work with a smart contract on the blockchain, we need to have\n"
                    "\tits constructor parameters. These can be imported from a valid contract's\n"
                    "\tinfo json file, if such exists, or be given here manually (necessary for\n"
-                   "\tthe first instantiation of the contract).\n"
+                   "\tthe first instantiation of the contract).\n\n"
                    "currently known contract's info json file: {}\n"
                    "currently known constructor parameters:\n{}\n".format('\t' + self.js_args['C_JSON'],
                                                                           utils().indent(cons_args_in_str())))
-        if 'y'==self._y_n_question('would you like to update any of the above?'):
+        if 'y' == self._y_n_question('would you like to update any of the above?'):
             c_json_i_msg = "After instantiation and deployment to the BCH blockchain, we save a json file\n" \
                            "with the contract's info, such as its address and constructor arguments."
-            self.js_args['C_JSON'] = self.parse_input(desc_line="set location for the deployed contract's info json file",
-                                                      default=self.js_args['C_JSON'],
-                                                      choices=None,
-                                                      i_msg=c_json_i_msg)
-            if 'y'==self._y_n_question('would you like to manually set the constructor arguments?'):
+            self.js_args['C_JSON'] = self.parse_input(
+                desc_line="set location for the deployed contract's info json file",
+                default=self.js_args['C_JSON'],
+                choices=None,
+                i_msg=c_json_i_msg)
+            if 'y' == self._y_n_question('would you like to manually set the constructor arguments?'):
                 for k in cons_args.keys():
                     v = self.parse_input(desc_line="{} {}".format(cons_args[k][0], cons_args[k][1]),
-                                                      default=cons_args[k][2],
-                                                      choices=None)
+                                         default=cons_args[k][2],
+                                         choices=None)
                     cons_args[k] = (cons_args[k][0], cons_args[k][1], v)
 
         # now we assume we are up to date
         self.cons_args = cons_args
-        self.js_args['CONSTRUCTOR_ARGS'] = ', '.join([cons_args[k][2] for k in [constructorInputs[i]["name"] for i in range(len(constructorInputs))]])
+        self.js_args['CONSTRUCTOR_ARGS'] = ', '.join(
+            [cons_args[k][2] for k in [constructorInputs[i]["name"] for i in range(len(constructorInputs))]])
 
     def init_contract(self):
         self.js_args['MAIN'] = "init_contract();\nprint_contract_info();"
@@ -887,21 +871,21 @@ class use_contract_CLI(cov_gen_CLI):
                 artifact_data = json.load(f)
             abi = artifact_data['abi']
 
-        if abi is None or len(abi)==0:
+        if abi is None or len(abi) == 0:
             self.print("Err: not able to get abi from the artifact, or abi is empty", ERR)
             return
 
         self.print("We will now create the transaction which interacts with the contract.")
 
         minerFee = self.parse_input(desc_line="set miner fee (in satoshis)",
-                              default='1000',
-                              choices=None,
-                              i_msg="The miner fee is hardcoded to the transaction.")
+                                    default='1000',
+                                    choices=None,
+                                    i_msg="The miner fee is hardcoded to the transaction.")
 
         func = self.parse_input(desc_line="Which function would you like to call?",
-                              default=None,
-                              choices=[func_d["name"] for func_d in abi],
-                              i_msg='Choose a function to call with the current transaction.')
+                                default=None,
+                                choices=[func_d["name"] for func_d in abi],
+                                i_msg='Choose a function to call with the current transaction.')
 
         ### get function arguments
 
@@ -909,65 +893,62 @@ class use_contract_CLI(cov_gen_CLI):
                    "** Note! type 'SIG' when the signature of the tx creator is required.\n"
                    "   more information st '-i'")
         args_i_msg = "Set the arguments to be passed to the chosen function: {}\n" \
-                "** Note! if the signature of the tx creator is required (mostly, this argument\n" \
-                "is named 'sig s' or something similar), then it cannot be explicitly provided\n" \
-                "by you since it has to sign the entire transaction, which is not ready yet.. \n" \
-                "so in this case, just type in 'SIG'".format(func)
+                     "** Note! if the signature of the tx creator is required (mostly, this argument\n" \
+                     "is named 'sig s' or something similar), then it cannot be explicitly provided\n" \
+                     "by you since it has to sign the entire transaction, which is not ready yet.. \n" \
+                     "so in this case, just type in 'SIG'".format(func)
         funcInputs = None
         for func_d in abi:
-            if func_d["name"]==func:
+            if func_d["name"] == func:
                 funcInputs = func_d["inputs"]
 
         funcArgs = []
         for item in funcInputs:
             v = self.parse_input(desc_line="{} {} = ".format(item["type"], item["name"]),
-                              default=None,
-                              choices=None,
-                              i_msg=args_i_msg)
+                                 default=None,
+                                 choices=None,
+                                 i_msg=args_i_msg)
             if v == 'SIG':
                 v = "new SignatureTemplate(walletInfo.childKeyPair)"
             funcArgs.append(v)
+
+        def short_parse(a):
+            return "{}".format(a) if a.isdigit() else "'{}'".format(a)
+        funcArgs_str = ', '.join([short_parse(arg) for arg in funcArgs])
 
         ### tx output
         outputs = []
         amounts = []
         self.print("Type in the outputs of the transaction. Note that order matters.")
-        output_i_msg = ""   # todo ... order according to the constructor.. amounts satoshis
+        output_i_msg = ""  # todo ... order according to the constructor.. amounts satoshis
         output_count = 0
-        while 'y'==self._y_n_question('would you like to add another output?', i_msg=output_i_msg):
-            out = self.parse_input(desc_line="output_{} = ".format(output_count),
-                              default=None,
-                              choices=None,
-                              i_msg=output_i_msg)
-            amount = self.parse_input(desc_line="amount_{} = ".format(output_count),
+        while 'y' == self._y_n_question('would you like to add a new output?', i_msg=output_i_msg):
+            out = self.parse_input(desc_line="output_{} (cashAdress)= ".format(output_count),
                                    default=None,
                                    choices=None,
                                    i_msg=output_i_msg)
+            amount = self.parse_input(desc_line="amount_{} (satoshis)= ".format(output_count),
+                                      default=None,
+                                      choices=None,
+                                      i_msg=output_i_msg)
             outputs.append(out)
             amounts.append(amount)
             output_count += 1
+        to_str = ''.join([".to('{}', {})".format(t[0], t[1]) for t in zip(outputs,amounts)])
 
-        self.js_args['TX_FUNC'] = "await con.functions.{}({}){}.withHardcodedFee({}).send();''".format(func,
-                                                                                                       ', '.join(funcArgs),
-                                                                                                       ''.join([".to('{}', {})".format(t[0], t[1]) for t in zip(outputs, amounts)]),
-                                                                                                       minerFee)
+        self.js_args['TX_FUNC'] = "await con.functions.{}({}){}.withHardcodedFee({});".format(func,
+                                                                                                     funcArgs_str,
+                                                                                                     to_str,
+                                                                                                     minerFee)
 
         self.js_args['MAIN'] = "use_contract();"
         self.js_run()
+
 
     def js_run(self):
         js = js_bridge()
         js.args = copy.deepcopy(self.js_args)
         js.run()
-
-
-
-
-
-
-
-
-
 
 
 def test_js():
@@ -1016,7 +997,7 @@ def test_js():
             'MAIN': "get_wallet_info();"
         }
 
-    if 1:
+    if 1:  # init
         j.args = {
             'DEBUG': 'true',
             'NETWORK': 'testnet',
@@ -1030,10 +1011,12 @@ def test_js():
             'C_JSON': '_cov_info.json',
             'DO_COMPILE': 'true',
             'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',
-            'CONSTRUCTOR_ARGS': 'walletInfo.childPKH',
+            'CONSTRUCTOR_ARGS': '8ce6638a77f1ec4d68ae2564cf47c8ad05e2bd26',
+            # 'CONSTRUCTOR_ARGS': '',
             'TX_FUNC': "''",
             # 'MAIN': "init_contract();"
-            'MAIN': "init_contract();\nprint_contract_info();"
+            # 'MAIN': "init_contract();\nprint_contract_info();"
+            'MAIN': "get_wallet_info();"
         }
 
     j.run()
@@ -1041,16 +1024,19 @@ def test_js():
 
 if __name__ == '__main__':
 
-    # test_js()
+    if 0:
+        test_js()
 
-    cli = cov_gen_CLI()
-    do_create_contract = cli.run()
-    if do_create_contract:
-        create_cli = create_contract_CLI()
-        create_cli.run()
-    else:
-        use_cli = use_contract_CLI()
-        use_cli.run()
+    # todo move to covGen.py
+    if 1:
+        cli = cov_gen_CLI()
+        do_create_contract = cli.run()
+        if do_create_contract:
+            create_cli = create_contract_CLI()
+            create_cli.run()
+        else:
+            use_cli = use_contract_CLI()
+            use_cli.run()
 
 
 
