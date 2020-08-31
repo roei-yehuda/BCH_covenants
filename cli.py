@@ -691,6 +691,10 @@ class use_contract_CLI(cov_gen_CLI):
 
         self.set_init()
 
+        self.set_constructor()
+
+
+
         self.print("\nGood, now that we have the basics, let's write the functions.\n" +
                    "\tIn a nutshell, a smart contract is composed of functions.\n" +
                    '\tEach function includes at least one restriction (requirement).\n' +
@@ -747,8 +751,7 @@ class use_contract_CLI(cov_gen_CLI):
         cash_f_i_msg = "a BCH smart contract written in cashScript is saved in source code in a cash file.\n" \
                        "After being compiled by cashc, an artifact file is saved in a json file. \n" \
                        "The artifact file features useful info about the contract, including its bytecode."
-        self.print("Set the paths to the contract's source code (cash file) and artifact (json file). \n"
-                   "It is better to provide both files, but it is necessary to provide at least one of them.")
+        self.print("Set the paths to the contract's source code (cash file) and artifact (json file).")
         self.js_args['CASH_F'] = self.parse_input(desc_line="location of contract's source code:",
                                                   default=self.js_args['CASH_F'],
                                                   choices=None,
@@ -760,8 +763,8 @@ class use_contract_CLI(cov_gen_CLI):
                                                   i_msg=cash_f_i_msg)
 
         c_json_i_msg = "After instantiation and deployment to the BCH blockchain, we save a json file\n" \
-                       "with the contract's info, such as its address."
-        self.js_args['C_JSON'] = self.parse_input(desc_line="set location for the deployed contract's info json file to be saved",
+                       "with the contract's info, such as its address and constructor arguments."
+        self.js_args['C_JSON'] = self.parse_input(desc_line="set location for the deployed contract's info json file",
                                                   default=self.js_args['C_JSON'],
                                                   choices=None,
                                                   i_msg=c_json_i_msg)
@@ -800,12 +803,72 @@ class use_contract_CLI(cov_gen_CLI):
 
 
 
-        self.js_args[''] = self.parse_input(desc_line="",
-                                            default=self.js_args[''],
-                                            choices=None,
-                                            i_msg="")
+        # self.js_args[''] = self.parse_input(desc_line="",
+        #                                     default=self.js_args[''],
+        #                                     choices=None,
+        #                                     i_msg="")
 
         return
+
+    def set_constructor(self):
+
+        # first, trying to find current known cons_args
+
+        cons_args = {}
+        constructorInputs, constructorValues = None, None
+
+        if os.path.exists(self.js_args['ARTIFACT_F']):
+            with open(self.js_args['ARTIFACT_F']) as f:
+                artifact_data = json.load(f)
+            constructorInputs = artifact_data['constructorInputs']
+
+        if os.path.exists(self.js_args['C_JSON']):
+            with open(self.js_args['C_JSON']) as f:
+                c_data = json.load(f)
+            constructorValues = c_data['constructorInputs']
+
+        if constructorInputs is not None:
+            if constructorValues is not None:
+                for i in range(len(constructorInputs)):
+                    cons_args[constructorInputs[i]["name"]] = (constructorInputs[i]["type"],
+                                                               constructorInputs[i]["name"],
+                                                               constructorValues[i])
+            else:
+                cons_args = {a["name"]:(a["type"], a["name"], '') for a in constructorInputs}
+
+        cons_args_in_str = lambda: '\n'.join(["{} {} = {}".format(cons_args[k][0], cons_args[k][1], cons_args[k][2]) for k in cons_args.keys()])
+
+
+        self.print("check constructor parameters:\n"
+                   "\tIn order to work with a smart contract on the blockchain, we need to have\n"
+                   "\tits constructor parameters. These can be imported from a valid contract's\n"
+                   "\tinfo json file, if such exists, or be given here manually (necessary for\n"
+                   "\tthe first instantiation of the contract).\n"
+                   "currently known contract's info json file: {}\n"
+                   "currently known constructor parameters:\n{}\n".format('\t' + self.js_args['C_JSON'],
+                                                                          utils().indent(cons_args_in_str())))
+        if 'y'==self._y_n_question('would you like to update any of the above?'):
+            c_json_i_msg = "After instantiation and deployment to the BCH blockchain, we save a json file\n" \
+                           "with the contract's info, such as its address and constructor arguments."
+            self.js_args['C_JSON'] = self.parse_input(desc_line="set location for the deployed contract's info json file",
+                                                      default=self.js_args['C_JSON'],
+                                                      choices=None,
+                                                      i_msg=c_json_i_msg)
+            if 'y'==self._y_n_question('would you like to manually set the constructor arguments?'):
+                for k in cons_args.keys():
+                    v = self.parse_input(desc_line="{} {}".format(cons_args[k][0], cons_args[k][1]),
+                                                      default=cons_args[k][2],
+                                                      choices=None)
+                    cons_args[k] = (cons_args[k][0], cons_args[k][1], v)
+
+        # now we assume we are up to date
+        self.cons_args = cons_args
+        self.js_args['CONSTRUCTOR_ARGS'] = ', '.join([cons_args[k][2] for k in [constructorInputs[i]["name"] for i in range(len(constructorInputs))]])
+
+
+
+
+
 
 
 
