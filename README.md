@@ -286,7 +286,3 @@ Be smart and be careful!
 ##### Contact us:
 roei.yehuda@mail.huji.ac.il\
 avigail.suna@mail.huji.ac.il
-
-
-
-
