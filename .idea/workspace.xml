@@ -4,6 +4,7 @@
     <list default="true" id="6c103c48-6bb0-4c29-9a45-9629b69255c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cli.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/covenant_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/covenant_generator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/js_bridge_template" beforeDir="false" afterPath="$PROJECT_DIR$/js_bridge_template" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -27,40 +28,40 @@
           <entry key="project.open.time.13" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.5" value="1" />
-          <entry key="project.open.time.7" value="1" />
+          <entry key="project.open.time.7" value="2" />
           <entry key="project.open.time.8" value="1" />
           <entry key="project.open.time.9" value="2" />
-          <entry key="project.opened" value="16" />
+          <entry key="project.opened" value="17" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="js_bridge_template" value="7" />
-          <entry key="py" value="19" />
+          <entry key="js_bridge_template" value="8" />
+          <entry key="py" value="20" />
           <entry key="spedn" value="2" />
           <entry key="ts" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="PLAIN_TEXT" value="9" />
-          <entry key="Python" value="19" />
+          <entry key="PLAIN_TEXT" value="10" />
+          <entry key="Python" value="20" />
           <entry key="TypeScript" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="1406" />
-          <entry key="js_bridge_template" value="10" />
-          <entry key="py" value="26693" />
+          <entry key="Python Console" value="1424" />
+          <entry key="js_bridge_template" value="12" />
+          <entry key="py" value="27407" />
           <entry key="spedn" value="70" />
           <entry key="ts" value="12" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="80" />
-          <entry key="Python" value="28099" />
+          <entry key="PLAIN_TEXT" value="82" />
+          <entry key="Python" value="28831" />
           <entry key="TypeScript" value="12" />
         </counts>
       </usages-collector>
@@ -77,21 +78,22 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/js_bridge_template">
+        <entry file="file://$PROJECT_DIR$/cli.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="492">
-              <caret line="213" lean-forward="true" selection-start-line="213" selection-end-line="213" />
+            <state relative-caret-position="152">
+              <caret line="433" lean-forward="true" selection-start-line="433" selection-end-line="433" />
+              <folding>
+                <element signature="e#64#96#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cli.py">
+        <entry file="file://$PROJECT_DIR$/js_bridge_template">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#64#96#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="672">
+              <caret line="273" lean-forward="true" selection-start-line="273" selection-end-line="273" />
             </state>
           </provider>
         </entry>
@@ -133,6 +135,8 @@
       <find>i_text</find>
       <find>another</find>
       <find>a new func</find>
+      <find>pragm</find>
+      <find>pragma</find>
     </findStrings>
     <replaceStrings>
       <replace>recipient</replace>
@@ -150,8 +154,8 @@
         <option value="$PROJECT_DIR$/js_bridge.py" />
         <option value="$PROJECT_DIR$/_temp_js_code.ts" />
         <option value="$PROJECT_DIR$/covenant_generator.py" />
-        <option value="$PROJECT_DIR$/cli.py" />
         <option value="$PROJECT_DIR$/js_bridge_template" />
+        <option value="$PROJECT_DIR$/cli.py" />
       </list>
     </option>
   </component>
@@ -300,12 +304,12 @@
     <frame x="8" y="31" width="1920" height="1017" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49837133" visible="true" weight="0.24434876" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49837133" visible="true" weight="0.24811625" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.50162864" side_tool="true" weight="0.2497309" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32990867" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.35958904" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3413242" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.49657536" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -315,7 +319,7 @@
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.32990867" />
-      <window_info anchor="bottom" id="Python Console" order="12" weight="0.43493152" />
+      <window_info anchor="bottom" id="Python Console" order="12" visible="true" weight="0.15410958" />
       <window_info anchor="bottom" id="TypeScript" order="13" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -362,27 +366,29 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/covenant_generator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="178">
+          <caret line="322" column="18" selection-end-line="535" />
           <folding>
             <element signature="e#662#671#0" expanded="true" />
-            <marker date="1598791084057" expanded="true" signature="9908:9913" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cli.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#64#96#0" expanded="true" />
+            <marker date="1598829223476" expanded="true" signature="9908:9913" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js_bridge_template">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="492">
-          <caret line="213" lean-forward="true" selection-start-line="213" selection-end-line="213" />
+        <state relative-caret-position="672">
+          <caret line="273" lean-forward="true" selection-start-line="273" selection-end-line="273" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cli.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="433" lean-forward="true" selection-start-line="433" selection-end-line="433" />
+          <folding>
+            <element signature="e#64#96#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
