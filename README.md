@@ -5,7 +5,7 @@
 
  **Dependencies:** 
 ![Python 3.6](https://img.shields.io/badge/python-3.6-green.svg?style=plastic)
-![crypto-hashing](https://img.shields.io/badge/crypto_hashing-1.0.0-purple.svg?style=plastic)
+![crypto_hashing 1.0.0](https://img.shields.io/badge/crypto_hashing-1.0.0-purple.svg?style=plastic)
 ![cashscript 0.4.0](https://img.shields.io/badge/cashscript-0.4.0-blue.svg?style=plastic)
 ![cashc_compiler ](https://img.shields.io/badge/cashc_compiler--blue.svg?style=plastic)
 ![TypeScript 9.0.0](https://img.shields.io/badge/TypeScript-9.0.0-blue.svg?style=plastic)
