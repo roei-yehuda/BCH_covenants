@@ -158,7 +158,7 @@ You can see that the source contract (the cashScript contract) is very long were
 In this example we will not go through all the steps.
 We will create a similar contract to example 1 and add an additional function 'covenant' that limits the amount that the operator can withdraw and gives a time window in which the cold key operators can revoke the transaction.\
 The new function is created in the in the interface as follows\
-![Teaser image](./pictures/08_end_contract.png)
+![Teaser image](./pictures/exp2_01_function2.png)
 
 The contract generated in cashScript looks as follows with both function in place:
  ```
