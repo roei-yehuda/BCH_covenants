@@ -1,78 +1,55 @@
+##  This file is part of the covGen project which can be found at https://github.com/roei-yehuda/BCH_covenants
+##  This project was a created for a university course, and then made publicly available.
+##  Introduction to Cryptocurrencies, course #67513, Hebrew University Jerusalem Israel, Aug 2020.
+##  Avigail Suna; avigail.suna@mail.huji.ac.il
+##  Roei Yehuda; roei.yehuda@mail.huji.ac.il
+
+
+"""
+
+The class js_bridge amends the js_bridge_template to create a temporary .js file (well, .ts to be exact) with the
+relevant script to connect and operate on the blockchain.
+
+"""
+
 import os
 
+
 class js_bridge():
-    """
-    This class creates and executes very simple JavaScript code files in order to deploy, operate and communicate with
-    contracts created by cov_gen.
-    The files this class creates look like this:
 
-import { BITBOX } from 'bitbox-sdk';
-import { Contract, SignatureTemplate } from 'cashscript';
-...
-((global_scope_code))
-...
-async function main() {
-    ...
-    ((main_scope_code))
-    ...
-}
-main();
+    def __init__(self):
+        self.args = {}
+        self.reset_args()
+        self.js_template_path = 'js_bridge_template'
+        self.js_temp_code_path = '_temp_js_code.ts'
 
-
-    """
-
-    def __init__(self, file_path: str = '_temp.js'):
-
-        self.f = file_path
-
-        self.g_lines = []   # global scope code
-        self.m_lines = []   # main scope code
-
-    def reset(self, file_path: str = '_temp.js'):
-        self.f = file_path
-        self.lines = []
-
-    def get_script(self):
-        """
-        We assume a very simple js file with a single function which is called main
-        :return: string
-        """
-
-        full_script = []
-
-        full_script.append("import { BITBOX } from 'bitbox-sdk';")
-        full_script.append("import { Contract, SignatureTemplate } from 'cashscript';")
-        full_script = full_script + self.g_lines
-        full_script.append("async function main() {")
-        full_script = full_script + ['\t' + l for l in self.m_lines]
-        full_script.append("}")
-        full_script.append("main();")
-
-        return '\n'.join(full_script)
-
-    def create_wallet(self, mnemonic='', wallet_json='wallet.json'):
-
-
-        self.g_lines.append("const fs = require('fs');")
-        self.g_lines.append("const outObj = new Object();")
-        self.g_lines.append("const json_f = '{}'".format(wallet_json))
-        self.g_lines.append("")
-        self.g_lines.append("")
-
-
-    def save(self):
-        with open(self.f, "w") as f:
-            print(self.get_script(), file=f)
+    def reset_args(self):
+        self.args = {
+            'DEBUG': 'false',
+            'NETWORK': 'testnet',
+            'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
+            'TESTNET_API': 'https://free-test.fullstack.cash/v3/', # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
+            'W_JSON': 'wallet.json',
+            'MNEMONIC': '',
+            'CHILD_I': '0',
+            'CASH_F': 'cov.cash',
+            'ARTIFACT_F': 'cov.json',
+            'C_JSON': '_cov_info.json',
+            'DO_COMPILE': 'true',
+            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)', # new ElectrumNetworkProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
+            'CONSTRUCTOR_ARGS': '',
+            'TX_FUNC': "''", # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
+            'MAIN': "console.log('Hello BCH world!');"
+        }
 
     def run(self):
-        self.save()
-        os.system("node " + self.f)
+        with open(self.js_template_path, mode='r') as f:
+            js_code = f.read()
 
+        for k in self.args.keys():
+            js_code = js_code.replace('###{}###'.format(k), self.args[k])
 
+        with open(self.js_temp_code_path, "w") as f:
+            print(js_code, file=f)
 
-if __name__ == '__main__':
-    jsb = js_bridge()
-    s = 'Hello JS!'
-    jsb.m_lines.append("console.log('{}');".format(s))
-    # print(jsb.get_script())
-    jsb.run()
+        os.system("ts-node " + self.js_temp_code_path)

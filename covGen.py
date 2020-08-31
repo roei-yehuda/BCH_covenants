@@ -1,3 +1,14 @@
+##  This file is part of the covGen project which can be found at https://github.com/roei-yehuda/BCH_covenants
+##  This project was a created for a university course, and then made publicly available.
+##  Introduction to Cryptocurrencies, course #67513, Hebrew University Jerusalem Israel, Aug 2020.
+##  Avigail Suna; avigail.suna@mail.huji.ac.il
+##  Roei Yehuda; roei.yehuda@mail.huji.ac.il
+
+
+"""
+This is the main file to use the covGen CLI
+"""
+
 from cli import *
 
 if __name__ == '__main__':

@@ -14,16 +14,18 @@
 ## Introduction
 Bitcoin contracts can restrict how much funds can be withdrawn from a contract, but as of today they cannot restrict who can withdraw those funds. Restricting what can be done with funds is what covenants are all about. A suggestion on how to implement covenants in bitcoin was presented in a paper titled ‘Bitcoin Covenants’ by Malte M¨oser, Ittay Eyal and Emin G¨un Sirer<sup>[1](https://maltemoeser.de/paper/covenants.pdf)</sup>. In order to make it work two new opcodes need to be added to the bitcoin operation codes.
 
-In 2017 bitcoin cash (BCH) hard forked from bitcoin (BTC), the reason being opcodes. Two opcodes that enable covenants in bitcoin cash are OP_CHECKSIG and OP_CHECKDATASIG. The added expressiveness of these opcodes allow for more expressive smart contracts, including covenants, in the bitcoin cash blockchain. From now on everything we will be discussing will be in BTH.
+In 2017 bitcoin cash (BCH) hard forked from bitcoin (BTC), the reason being opcodes. Two opcodes that enable covenants in bitcoin cash are OP_CHECKSIG and OP_CHECKDATASIG. The added expressiveness of these opcodes allow for more expressive smart contracts, including covenants, in the bitcoin cash blockchain. From now on everything we will be discussing will be in BCH.
 
-Unlike with Ethereum contracts, in BTH contracts are not deployed on the blockchain but are defined by an cryptographed address unique to the contract. Funds can be sent to and received from the contract address. A contract contains functions with requirements, if all requirements are met, funds can be withdrawn from the contract.
+Unlike with Ethereum contracts, in BCH contracts are not deployed on the blockchain but are defined by an cryptographed address unique to the contract. Funds can be sent to and received from the contract address. A contract contains functions with requirements, if all requirements are met, funds can be withdrawn from the contract.
 
-BTH has two main high-level programming languages for smart contracts, Spedn and cashScript. This project compiles a users desired contract to cashScript and from cashScript to the opcodes. We chose to work with cashScript because it is closer in form to solidity and we have learnt to use solidity in class.
+BCH has two main high-level programming languages for smart contracts, Spedn and cashScript. This project compiles a users desired contract to cashScript and from cashScript to the opcodes. We chose to work with cashScript because it is closer in form to solidity and we have learnt to use solidity in class.
 
-Our covGen offers an abstraction layer over cashScript and provides an easy interactive platform to create and deploy covenants on BTH. In addition, covGen hides away most of the necessary yet troublesome code in JavaScript used for deployment and interaction with BCH smart contracts.
+Our covGen offers an abstraction layer over cashScript and provides an easy interactive platform to create and deploy covenants on BCH. In addition, covGen hides away most of the necessary yet troublesome code in JavaScript used for deployment and interaction with BCH smart contracts.
 
 ## Description
-The covGen is a command line interface run by python that generates covenants and smart contract for the bitcoin cash blockchain.
+The covGen is a CLI program that generates and compiles smart contract and covenants in cashScript for the bitcoin cash blockchain.
+In addition, covGen allows the instantiation of compiled smart contracts, as well as interacting with deployed contracts.
+
 ### Features:
  - **Smart contract creation:**\
  This aspect of the contract generator allows for a variety of restrictions 
@@ -50,17 +52,25 @@ The covGen is a command line interface run by python that generates covenants an
         If min is defined, then the funds must be pulled after the TIME specified\
         If max is defined, the funds must be pulled before the TIME specified.
 
- - **Interaction with deployed contracts**
+ - **Instantiation and use of smart contracts**
+    - **Instantiation and deployment:**\
+   Once a contract is compiled, the CLI allows the user to instantiate the contract by providing the arguments for the
+   contract constructor. 
+   - **Operation of a deployed contract:**\
+   Once a contract is instantiated and deployed, it is possible to interact with it - the CLI allows 
+   the user to create transactions that call to functions in the deployed contract.
+ 
 
 ## Usage
 After cloning this repo and installing all dependencies, run the covGen program through `python3 covGen.py`\
-There are three global commands that can be called at any given moment for assistance:\
+
+Three commands that you may type in at every point in time:\
  - -h:\
- by calling '-h' you wil receive help on a global level, information about the global commands.
+ print to screen a reminder information about the global commands
  - -i:\
- '-i' gives you information specific to the place in the code that it is called.
+ '-i' gives you information specific to the place in the code that it is called. 
  - -exit:\
- '-exit' will exit the code and terminate the contract you are in the process of building.
+ '-exit' will terminate the program (any contract may have been working on will be lost)
  
 ## Examples
  **Example 1 - Joint account:**

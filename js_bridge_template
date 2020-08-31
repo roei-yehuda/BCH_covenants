@@ -1,5 +1,5 @@
 /*
-This file is a template...
+This file is a template that is used by the js_bridge class. After replacing all of the ###x### it is saved as a temporary .ts file.
 */
 
 import {BITBOX} from "bitbox-sdk";
@@ -41,50 +41,12 @@ const outObj = new Object();
 
 
 // @ts-ignore
-async function create_wallet() {	// DEPRECATED
-	/*
-	Creates an HDnode and saves its info into w_json_f.
-	*/
-
-	if (mnemonic === '') {
-		mnemonic = bitbox.Mnemonic.generate();
-	}
-
-	const rootSeed = bitbox.Mnemonic.toSeed(mnemonic);
-	const hdNode = bitbox.HDNode.fromSeed(rootSeed, NETWORK);	// wallet
-	const childNode = bitbox.HDNode.derive(hdNode, child_i);
-	const childKeyPair = bitbox.HDNode.toKeyPair(childNode);	// alice
-	const childPK = bitbox.ECPair.toPublicKey(childKeyPair);	// alicePk
-
-	// Write out the basic information into a json file
-	const outObj = {
-		mnemonic: mnemonic,
-		hdNode: hdNode,
-		childNode_i: child_i,
-		childNode: childNode,
-		childKeyPair: childKeyPair,
-		childPK: childPK,
-		cashAddress: bitbox.HDNode.toCashAddress(childNode),
-		legacyAddress: bitbox.HDNode.toLegacyAddress(childNode),
-		WIF: bitbox.HDNode.toWIF(childNode)
-	};
-	fs.writeFile(w_json_f, JSON.stringify(outObj, null, 2), function (err) {
-      if (err) return console.error(err)
-      console.log(w_json_f + ' written successfully.');
-    });
-
-}
-
-
-// @ts-ignore
 async function get_wallet_info(mn?:string) {
 
 	if (mnemonic === '') {
 		if (mn!=undefined) {
 			mnemonic = mn;
 		} else {
-			// const walletInfo = await load_wallet_info();
-			// mnemonic = walletInfo.mnemonic;
 			mnemonic = await load_wallet_mnemonic_from_json();
 		}
 	}
@@ -119,12 +81,11 @@ async function get_wallet_info(mn?:string) {
 
 	return walletInfo;
 
-
 }
 
 
 async function get_contract(){
-	// var con;
+
 	const artifact = CashCompiler.compileFile(cash_f);
 	const provider = ###NET_PROVIDER###;
 
@@ -151,8 +112,6 @@ async function init_contract() {
 	same as get_contract but with writing to json
 	*/
 
-	// const walletInfo = await get_wallet_info();
-
 	const artifact = CashCompiler.compileFile(cash_f);
 	const provider = ###NET_PROVIDER###;
 
@@ -160,22 +119,13 @@ async function init_contract() {
 	let input_args_str = '###CONSTRUCTOR_ARGS###';
 	let constructorArgsList = [];
 	if (input_args_str==='') {
-		//console.log('constructorArgsList from load_contract_info');
 		const conInfo = await load_contract_info();
 		constructorArgsList = conInfo.constructor_args;
 	} else {
-		//console.log('constructorArgsList from input_args_str.split(');
 		constructorArgsList = input_args_str.split(', ');
 	}
-	//console.log(constructorArgsList);
 
 	const con = new Contract(artifact, constructorArgsList, provider);
-
-	if (debug) {
-		console.log('\nin init_contract:');
-		console.log(con.address);
-	}
-
 
 	// Write out the basic information into con_info_json_f
 	const outObj = {
@@ -213,6 +163,7 @@ async function load_contract_info(){
 	return conInfo;
 }
 
+
 // @ts-ignore
 async function load_wallet_mnemonic_from_json(){
 	/*
@@ -232,6 +183,7 @@ async function load_wallet_mnemonic_from_json(){
 	// console.log('loaded ' + w_json_f);
 	return walletInfo.mnemonic;
 }
+
 
 // @ts-ignore
 async function print_contract_info() {

@@ -1,68 +1,41 @@
-# this is the command line interface for our covenant generator
+##  This file is part of the covGen project which can be found at https://github.com/roei-yehuda/BCH_covenants
+##  This project was a created for a university course, and then made publicly available.
+##  Introduction to Cryptocurrencies, course #67513, Hebrew University Jerusalem Israel, Aug 2020.
+##  Avigail Suna; avigail.suna@mail.huji.ac.il
+##  Roei Yehuda; roei.yehuda@mail.huji.ac.il
+
+
+"""
+
+The code in this file holds the command-line interface (CLI) for the covGen.
+
+The classes cov_gen_CLI and create_contract_CLI utilize the cov_gen class to create and compile a new contract.
+cov_gen_CLI and use_contract_CLI use the js_bridge class for deployment, management of and interaction with smart
+contracts on the blockchain through the JavaScript SDK.
+
+"""
+
 from covenant_generator import *
+from js_bridge import *
+
 import copy
 import os
 import sys
 import re
 
+# allow to print in color on the shell:
 from termcolor import colored
 import platform
-
 if platform.platform().startswith('Windows'):
     import colorama
-
     colorama.init()
-
-# print colors:
 REG = 'white'
 ERR = 'red'
 IN = 'yellow'
 HIGHLIGHT = 'cyan'
 
-debug = True
 
-
-class js_bridge():
-
-    def __init__(self):
-        self.args = {}
-        self.reset_args()
-        self.js_template_path = 'js_bridge_template'
-        self.js_temp_code_path = '_temp_js_code.ts'
-
-    def reset_args(self):
-        self.args = {
-            'DEBUG': 'false',
-            'NETWORK': 'testnet',
-            'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
-            'TESTNET_API': 'https://free-test.fullstack.cash/v3/',
-            # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
-            'W_JSON': 'wallet.json',
-            'MNEMONIC': '',
-            'CHILD_I': '0',
-            'CASH_F': 'cov.cash',
-            'ARTIFACT_F': 'cov.json',
-            'C_JSON': '_cov_info.json',
-            'DO_COMPILE': 'true',
-            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',
-            # new ElectrumNetworkProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
-            'CONSTRUCTOR_ARGS': '',
-            'TX_FUNC': "''",
-            # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
-            'MAIN': "console.log('Wassup??');"
-        }
-
-    def run(self):
-        with open(self.js_template_path, mode='r') as f:
-            js_code = f.read()
-
-        for k in self.args.keys():
-            js_code = js_code.replace('###{}###'.format(k), self.args[k])
-
-        with open(self.js_temp_code_path, "w") as f:
-            print(js_code, file=f)
-
-        os.system("ts-node " + self.js_temp_code_path)
+debug = False
 
 
 class cov_gen_CLI():
@@ -109,8 +82,9 @@ class cov_gen_CLI():
         q = "First things first, what are you here for?\n" \
             "1) Create and compile a new smart contract\n" \
             "2) Initialize or use an existing contract\n"
-        intro_msg_i = "intro_msg_i"  # todo
-
+        intro_msg_i = "The covGen has two modes - \n" \
+                      "mode 1: creation (+compilation) of a new smart contract\n" \
+                      "mode 2: instantiating and operation of a compiled contract"
         do_create_contract = '1' == self.parse_input(desc_line=q,
                                                      default=None,
                                                      choices=["1", "2"],
@@ -127,11 +101,8 @@ class cov_gen_CLI():
 
         self.print("{q}{deft}{choice}{sep}".format(q=desc_line,
                                                    deft='' if default is None else ' [{}]'.format(str(default)),
-                                                   choice='' if (
-                                                           choices is None or not show_choice) else " {" + ', '.join(
-                                                       choices) + "}",
-                                                   sep=' ' if desc_line == '' or desc_line.endswith(
-                                                       ("?", "\n", "-", "=")) else ': '), IN, end)
+                                                   choice='' if (choices is None or not show_choice) else " {" + ', '.join(choices) + "}",
+                                                   sep=' ' if desc_line == '' or desc_line.endswith(("?", "\n", "-", "=")) else ': '), IN, end)
         my_input = input().strip()
 
         # help and global functions
@@ -168,9 +139,11 @@ class cov_gen_CLI():
 
     def _h(self):
         """ help information global """
-        # todo
-        self.print(' -h: help\n-exit: exit and close\n'
-                   '-i information about this specific function')
+        h_msg = "The following commands can be typed in at any time:\n" \
+                "-h: help (this message)\n" \
+                "-i: information for cuurent position\n" \
+                "-exit: terminate the program"
+        self.print(h_msg)
 
 
     def _exit(self):
@@ -186,7 +159,12 @@ class cov_gen_CLI():
                                 i_msg=i_msg)
 
 
+
+
 class create_contract_CLI(cov_gen_CLI):
+    """
+    CLI for the first mode - creation (+compilation) of a new smart contract
+    """
     # restrictions info massages:
     rs_operators_i_msg = "Operator of a function is someone who is allowed to use (call) it.\n" \
                          "Their public key and signature will be checked upon calling the function.\n" \
@@ -230,10 +208,12 @@ class create_contract_CLI(cov_gen_CLI):
         super().__init__()
 
     def run(self):
+        """
+        initiate the creation of a new contract - defining name and functions and restrictions
+        """
 
         # variables for the generation of cov_gen
-        self.cov_init_args = copy.deepcopy(
-            cov_gen.cov_init_kwargs_d)  # {'contract_name':'cov', 'cashScript_pragma':'0.5.0', 'miner_fee':1000, 'intro_comment':''}
+        self.cov_init_args = copy.deepcopy(cov_gen.cov_init_kwargs_d)  # {'contract_name':'cov', 'cashScript_pragma':'0.5.0', 'miner_fee':1000, 'intro_comment':''}
         self.cov_funcs_list = []
 
         self.set_init()
@@ -254,12 +234,14 @@ class create_contract_CLI(cov_gen_CLI):
         # generate contract and exit
         self.print('\n', REG)
         self.generate_cov()
-        # self.print("Exiting. Goodbye", HIGHLIGHT)
         self._exit()
 
     def set_init(self):
+        """
+        Setting some basic initial parameters for the contract, before going down the rabbit hole with the functions
+        """
+
         self.print('Upon creating a new contract, set some basic parameters first:')
-        # {'contract_name':'cov', 'cashScript_pragma':'0.4.0', 'miner_fee':1000, 'intro_comment':''}
         self.cov_init_args['contract_name'] = self.parse_input(desc_line='contract name (wo spaces)',
                                                                tp=str,
                                                                default=self.cov_init_args['contract_name'],
@@ -286,14 +268,20 @@ class create_contract_CLI(cov_gen_CLI):
         return
 
     def fn_rs_operators(self):
-        """ restrict operators """
+        """
+        restrict operators
+        """
+
         r_d = copy.deepcopy(cov_fn.restrict_operators_kwargs_d)
         r_d['n'] = self.parse_input(desc_line='number of desired operators', tp=int, default=1,
                                     i_msg=self.rs_operators_i_msg)
         return r_d
 
     def fn_rs_recipients(self):
-        """ restrict recipients """
+        """
+        restrict recipients
+        """
+
         r_d = copy.deepcopy(cov_fn.restrict_recipients_kwargs_d)
 
         r_d['n_PKH'] = self.parse_input(desc_line='number of desired P2PKH recipients (P2PKH)', tp=int, default=1,
@@ -313,7 +301,10 @@ class create_contract_CLI(cov_gen_CLI):
         return r_d
 
     def fn_rs_amount(self):
-        """ restrict the amount that can be pulled in a transaction """
+        """
+        restrict the amount that can be pulled in a transaction
+        """
+
         r_d = copy.deepcopy(cov_fn.restrict_amount_kwargs_d)
         _tx = "It is possible to restrict the amount per transaction or per recipient or both"
         self.print(_tx, REG)
@@ -333,7 +324,10 @@ class create_contract_CLI(cov_gen_CLI):
         return r_d
 
     def fn_rs_time(self):
-        """ create a time window for cancellation """
+        """
+        create a time window for cancellation
+        """
+
         r_d = copy.deepcopy(cov_fn.restrict_time_kwargs_d)
         _tx = "A time restriction defines the time window in which the funds can be pulled, and can\n" \
               "either be used with a relative or absolute time lock."
@@ -375,6 +369,10 @@ class create_contract_CLI(cov_gen_CLI):
         return r_d
 
     def add_fn(self):
+        """
+        add a new function to the contract
+        """
+
         fn_name = self.parse_input(desc_line='function name', tp=str, default=None,
                                    i_msg='write a name for your function (again - wo spaces)) and then click enter')
         self.print("{} new function: {}".format('-' * 20, fn_name), HIGHLIGHT)
@@ -412,7 +410,12 @@ class create_contract_CLI(cov_gen_CLI):
 
         self.print("{} end of function: {}".format('-' * 20, fn_name), HIGHLIGHT)
 
+
     def add_updatability(self):
+        """
+        create a function with a single restriction for operator(s) to allow them
+        to transfer the funds to a new contract
+        """
 
         fn_name = 'editContract'
         fn_desc = 'allows an editor to transfer the funds in this contract to a new one'
@@ -426,19 +429,15 @@ class create_contract_CLI(cov_gen_CLI):
                                     i_msg=self.update_i_msg)
         fn_restrictions.append((r, r_d))
 
-        # r = 'recipients'
-        # r_d = copy.deepcopy(cov_fn.restrict_recipients_kwargs_d)
-        # r_d['n_PKH'] = 0
-        # r_d['n_SH'] = 1
-        # r_d['require_recipient_sig'] = False
-        # r_d['include_all'] = False
-        # fn_restrictions.append((r, r_d))
-
         self.cov_funcs_list.append((fn_name, fn_desc, fn_restrictions))
 
         self.print("{} end of function: {}".format('-' * 20, fn_name), HIGHLIGHT)
 
     def generate_cov(self):
+        """
+        use cov_gen to generate the source code and artifact for the contract
+        """
+
         cg = cov_gen(**self.cov_init_args)
         cg.build_from_fn_list(self.cov_funcs_list)
         self.print("{} final script: {}".format('-' * 20, '-' * 20), HIGHLIGHT)
@@ -468,12 +467,18 @@ class create_contract_CLI(cov_gen_CLI):
 
 
 class use_contract_CLI(cov_gen_CLI):
+    """
+    CLI for the second mode - instantiating and operation of a compiled contract
+    """
 
     def __init__(self):
         super().__init__()
         self.js_args = copy.deepcopy(js_bridge().args)
 
     def run(self):
+        """
+        initiate the instantiation of a contract - defining general parameters (e.g. network) and constructor arguments
+        """
 
         self.js_args = copy.deepcopy(js_bridge().args)
 
@@ -503,6 +508,11 @@ class use_contract_CLI(cov_gen_CLI):
                 i_msg='Choose an action. You can always type in -h for general instructions.')
 
     def set_init(self):
+        """
+        Set basic parameters for the deployment of a contract. this is a long method with ~10 parameters to set,
+        but the majority have default values
+        """
+
         self.print('Before we start interacting with the contract, we need to set some basics first.')
         self.print("Currently, all your parameters are set to default:", IN)
         self.print(utils().indent("\n".join(["{} = {}".format(k, self.js_args[k]) for k in self.js_args.keys()])))
@@ -606,6 +616,9 @@ class use_contract_CLI(cov_gen_CLI):
         return
 
     def set_constructor(self):
+        """
+        define the arguments the constructor of the contract instance should get
+        """
 
         # first, trying to find current known cons_args
 
@@ -663,10 +676,17 @@ class use_contract_CLI(cov_gen_CLI):
             [cons_args[k][2] for k in [constructorInputs[i]["name"] for i in range(len(constructorInputs))]])
 
     def init_contract(self):
+        """
+        call js_bridge with the main function of init_contract()
+        """
+
         self.js_args['MAIN'] = "init_contract();\nprint_contract_info();"
         self.js_run()
 
     def use_contract(self):
+        """
+        Define a transaction that uses a deployed contract
+        """
 
         abi = None
         if os.path.exists(self.js_args['ARTIFACT_F']):
@@ -723,7 +743,9 @@ class use_contract_CLI(cov_gen_CLI):
         outputs = []
         amounts = []
         self.print("Type in the outputs of the transaction. Note that order matters.")
-        output_i_msg = ""  # todo ... order according to the constructor.. amounts satoshis
+        output_i_msg = "Define the output(s) of the tx. Both the cashAdresses and amounts (satoshis).\n" \
+                       "If the function being called has a restriction over its recipients, these must\n" \
+                       "be given here in the exact same order as mentioned in the contract source code."
         output_count = 0
         while 'y' == self._y_n_question('would you like to add a new output?', i_msg=output_i_msg):
             out = self.parse_input(desc_line="output_{} (cashAdress)= ".format(output_count),
@@ -740,106 +762,21 @@ class use_contract_CLI(cov_gen_CLI):
         to_str = ''.join([".to('{}', {})".format(t[0], t[1]) for t in zip(outputs,amounts)])
 
         self.js_args['TX_FUNC'] = "await con.functions.{}({}){}.withHardcodedFee({});".format(func,
-                                                                                                     funcArgs_str,
-                                                                                                     to_str,
-                                                                                                     minerFee)
+                                                                                              funcArgs_str,
+                                                                                              to_str,
+                                                                                              minerFee)
 
         self.js_args['MAIN'] = "use_contract();"
         self.js_run()
 
 
     def js_run(self):
+        """
+        Use the self.js_args as set by now to create a temporary js script and run it
+        """
+
         js = js_bridge()
         js.args = copy.deepcopy(self.js_args)
         js.run()
 
 
-def test_js():
-    j = js_bridge()
-
-    # default:
-    if 0:
-        j.args = {
-            'DEBUG': 'true',
-            'NETWORK': 'testnet',
-            'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
-            'TESTNET_API': 'https://free-test.fullstack.cash/v3/',
-            # (Chris) 'https://free-test.fullstack.cash/v3/'    # (ts) 'https://trest.bitcoin.com/v2/'
-            'W_JSON': 'wallet.json',
-            'MNEMONIC': '',
-            'CHILD_I': '0',
-            'CASH_F': 'cov.cash',
-            'ARTIFACT_F': 'cov.json',
-            'C_JSON': '_cov_info.json',
-            'DO_COMPILE': 'true',
-            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',
-            # new ElectrumNetworkProvider(NETWORK)   # new BitboxNetworkProvider(NETWORK, bitbox)
-            'CONSTRUCTOR_ARGS': '',
-            'TX_FUNC': "''",
-            # the entire right hand side for "const txDetails = " , should start with "await con.functions. ..."
-            'MAIN': "console.log('Wassup??');"
-        }
-
-    # get wallet:
-    if 0:
-        j.args = {
-            'DEBUG': 'true',
-            'NETWORK': 'testnet',
-            'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
-            'TESTNET_API': 'https://free-test.fullstack.cash/v3/',
-            'W_JSON': 'wallet_C.json',
-            'MNEMONIC': '',
-            'CHILD_I': '0',
-            'CASH_F': 'cov.cash',
-            'ARTIFACT_F': 'cov.json',
-            'C_JSON': '_cov_info.json',
-            'DO_COMPILE': 'true',
-            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',
-            'CONSTRUCTOR_ARGS': '',
-            'TX_FUNC': "''",
-            'MAIN': "get_wallet_info();"
-        }
-
-    if 1:  # init
-        j.args = {
-            'DEBUG': 'true',
-            'NETWORK': 'testnet',
-            'MAINNET_API': 'https://free-main.fullstack.cash/v3/',
-            'TESTNET_API': 'https://free-test.fullstack.cash/v3/',
-            'W_JSON': 'wallet_C.json',
-            'MNEMONIC': '',
-            'CHILD_I': '0',
-            'CASH_F': 'cov.cash',
-            'ARTIFACT_F': 'cov.json',
-            'C_JSON': '_cov_info.json',
-            'DO_COMPILE': 'true',
-            'NET_PROVIDER': 'new BitboxNetworkProvider(NETWORK, bitbox)',
-            'CONSTRUCTOR_ARGS': '8ce6638a77f1ec4d68ae2564cf47c8ad05e2bd26',
-            # 'CONSTRUCTOR_ARGS': '',
-            'TX_FUNC': "''",
-            # 'MAIN': "init_contract();"
-            # 'MAIN': "init_contract();\nprint_contract_info();"
-            'MAIN': "get_wallet_info();"
-        }
-
-    j.run()
-
-
-if __name__ == '__main__':
-
-    if 0:
-        test_js()
-
-    # todo move to covGen.py
-    if 1:
-        cli = cov_gen_CLI()
-        do_create_contract = cli.run()
-        if do_create_contract:
-            create_cli = create_contract_CLI()
-            create_cli.run()
-        else:
-            use_cli = use_contract_CLI()
-            use_cli.run()
-
-
-#

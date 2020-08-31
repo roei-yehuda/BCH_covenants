@@ -1,31 +1,21 @@
-# todo - check for any "???" left...
-# todo - add a clear desclaimer that this is a 'school' project.. no taking responsibility here :)
+##  This file is part of the covGen project which can be found at https://github.com/roei-yehuda/BCH_covenants
+##  This project was a created for a university course, and then made publicly available.
+##  Introduction to Cryptocurrencies, course #67513, Hebrew University Jerusalem Israel, Aug 2020.
+##  Avigail Suna; avigail.suna@mail.huji.ac.il
+##  Roei Yehuda; roei.yehuda@mail.huji.ac.il
+
 
 """
-This file is part of the ??? project which can be found at ???github...???
-This project was a created for a university course, and then made publicly available.
-Introduction to Cryptocurrencies, course #67513, Hebrew University Jerusalem Israel, Aug 2020.
-Avigail Suna; email ???
-Roei Yehuda; email ???
 
 The purpose of the code here is to implement a cashScript (https://cashscript.org/) covenants generator for BCH smart contracts.
-The class cov_gen outputs a .cash file with the generated covenant smart contract.
+The class cov_gen outputs a source code .cash file with the generated smart contract, and an artifact json file
+with a compiled byte-code.
+
 """
 
-import os
-import copy
-import json
 
-# import os.path
-# import os.system
-# import glob
-# import datetime
-# import sys
-# from datetime import datetime
-# import re
-# import numpy as np
-# import pandas as pd
-# import subprocess
+import os
+import json
 
 
 class utils():
@@ -294,7 +284,6 @@ class cov_fn():
         :param max: string
         :param time_limit: bool - if True, we use tx.time
         :param age_limit: bool - if True, we use tx.age
-        :return:
         """
 
         if (min is None and max is None) or (time_limit is None and age_limit is None):
@@ -316,7 +305,7 @@ class cov_fn():
 
 class cov_gen():
     """
-    This class is responsible for the construction of a cashScript covenant smart contrat.
+    This class is responsible for the construction of a cashScript covenant smart contract.
     Once completed, a generated script can be saved to file and even be compiled by cashc.
     """
 
@@ -496,40 +485,4 @@ class cov_gen():
         """
         for fn_tup in l:
             self.new_fn(fn_tup[0], fn_tup[1], fn_tup[2])
-
-
-
-if __name__ == '__main__':
-
-    cg = cov_gen('my_first_cov')
-    funcs_list = []
-
-    f1 = 'cold'
-    f1_desc = 'this is a cold func'
-    f1_restrictions = []
-
-    r, r_d = 'operators', copy.deepcopy(cov_fn.restrict_operators_kwargs_d) # {'n':1}
-    r_d['n'] = 2
-    f1_restrictions.append((r, r_d))
-
-    r, r_d = 'time', copy.deepcopy(cov_fn.restrict_time_kwargs_d) # {'min':None, 'max':None, 'time_limit':None, 'age_limit':None}
-    r_d['min'] = '30 days'
-    r_d['age_limit'] = True
-    f1_restrictions.append((r, r_d))
-
-    funcs_list.append((f1, f1_desc, f1_restrictions))
-
-    # f2 = 'spend'
-    # f2_desc = ''
-    # f2_restrictions = []
-    # r, r_d = 'recipients', copy.deepcopy(cov_fn.restrict_recipients_kwargs_d) # {'n_PKH':1, 'n_SH':0, 'require_recipient_sig':False, 'include_all':False}
-    # r_d['n_PKH']=2
-    # f2_restrictions.append((r, r_d))
-    # cov_funcs_list.append((f2, f2_desc, f2_restrictions))
-
-    cg.build_from_fn_list(funcs_list)
-    print(cg.get_script())
-
-    # print(cg.compile_script(cash_file_path='cov.cash', json_file_path='cov.json'))
-
 
