@@ -453,15 +453,17 @@ class create_contract_CLI(cov_gen_CLI):
             cash_f = self.parse_input(desc_line='choose location for the smart contract file',
                                       default=cash_f_def,
                                       i_msg=save_i_msg)
-            json_f = self.parse_input(desc_line='choose location for the smart contract file',
+            json_f = self.parse_input(desc_line='choose location for the artifact file',
                                       default=json_f_def,
                                       i_msg=save_i_msg)
-            cg.compile_script(cash_f, json_f)
+
+            byte_code = cg.compile_script(cash_f, json_f)
+            self.print("{}\nThe compiled code: \n".format('-' * 20), HIGHLIGHT)
+            self.print(byte_code)
             self.print(
                 "{}\nFiles for the smart contract were successfully saved at:\n{}\n{}\nGoodbye :)".format('-' * 20,
                                                                                                           cash_f,
-                                                                                                          json_f),
-                HIGHLIGHT)
+                                                                                                          json_f), HIGHLIGHT)
         return cg
 
 
